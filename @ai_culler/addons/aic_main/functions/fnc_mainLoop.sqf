@@ -3,6 +3,13 @@ if !(isServer) exitWith {};
 diag_log "[AIC] Starting culler loop";
 
 while {true} do {
+    if (!AIC_cullerEnabled) then {
+        // Re-enable any units that were disabled before culler was turned off
+        { [_x] call AIC_fnc_enableUnit; } forEach (allUnits select { _x getVariable ["AIC_disabled", false] });
+        sleep AIC_checkInterval;
+        continue;
+    };
+
     private _players = allPlayers select { isPlayer _x };
 
     // Count protected infantry before the main filter excludes them

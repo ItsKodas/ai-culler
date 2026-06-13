@@ -27,6 +27,7 @@ class CfgFunctions {
             class initZeusHooks    {};
             class createStatusWindow {};
             class updateStatusWindow {};
+            class setCullerEnabled {};
         };
     };
 };

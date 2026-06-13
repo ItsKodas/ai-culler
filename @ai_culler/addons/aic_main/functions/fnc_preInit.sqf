@@ -4,6 +4,7 @@ AIC_distIndependent = 800;
 AIC_distCivilian    = 400;
 AIC_checkInterval   = 5;
 AIC_debug           = true;
+AIC_cullerEnabled   = true;
 
 if (AIC_debug) then {
     diag_log "[AIC] Settings initialised";
