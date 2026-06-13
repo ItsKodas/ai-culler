@@ -12,6 +12,15 @@ while {true} do {
 
     private _players = allPlayers select { isPlayer _x };
 
+    // Reference points for distance / LOS checks: player eye positions + active Zeus camera positions.
+    // Zeus camera positions are broadcast from clients via AIC_zeusPos so the server can read them.
+    // Each entry: [worldPos (ASL), playerObjOrObjNull]
+    private _refPoints = _players apply { [eyePos _x, _x] };
+    {
+        private _camPos = _x getVariable ["AIC_zeusPos", []];
+        if (count _camPos > 0) then { _refPoints pushBack [_camPos, objNull]; };
+    } forEach _players;
+
     // Count protected infantry before the main filter excludes them
     private _protectedCount = {
         alive _x &&
@@ -30,24 +39,6 @@ while {true} do {
         (side _x in [west, east, resistance, civilian])
     };
 
-    // Register WaypointAdded EH on any new managed group — fires server-side for both
-    // Zeus group waypoints and single-unit waypoints (both target the group in Arma 3)
-    {
-        private _grp = group _x;
-        if !(_grp in AIC_waypointEHGroups) then {
-            _grp addEventHandler ["WaypointAdded", {
-                params ["_grp"];
-                {
-                    if (!(_x getVariable ["zeusProtected", false])) then {
-                        [_x] call AIC_fnc_enableUnit;
-                    };
-                    [_x] remoteExec ["AIC_fnc_updateUnitLabel", 0];
-                } forEach (units _grp);
-            }];
-            AIC_waypointEHGroups pushBack _grp;
-        };
-    } forEach _allAI;
-
     private _outOfRange   = [];
     private _inRangeNoLOS = [];
     private _inRangeLOS   = [];
@@ -56,16 +47,18 @@ while {true} do {
         private _unit     = _x;
         private _cullDist = [_unit] call AIC_fnc_getCullDist;
 
-        // Pass 1: find nearest player with cheap distance math only
+        // Pass 1: find nearest reference point (player body or Zeus camera)
         private _nearestDist   = 99999;
+        private _nearestEyePos = [0,0,0];
         private _nearestPlayer = objNull;
         {
-            private _d = _unit distance _x;
+            private _d = _unit distance (_x select 0);
             if (_d < _nearestDist) then {
                 _nearestDist   = _d;
-                _nearestPlayer = _x;
+                _nearestEyePos = _x select 0;
+                _nearestPlayer = _x select 1;
             };
-        } forEach _players;
+        } forEach _refPoints;
 
         if (_nearestDist > _cullDist) then {
             // Out of range — cull
@@ -87,12 +80,12 @@ while {true} do {
                 if (_inCombat) then {
                     _inRangeLOS pushBack [_unit, _nearestDist];
                 } else {
-                    // LOS check against nearest player only (not all players)
+                    // LOS check against nearest reference point (player body or Zeus camera)
                     // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
                     // lineIntersectsObjs ignores terrain trees naturally (they are terrain geometry, not objects)
-                    private _hasLOS = !(terrainIntersectASL [eyePos _nearestPlayer, eyePos _unit]);
+                    private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
                     if (_hasLOS) then {
-                        private _hits = lineIntersectsObjs [eyePos _nearestPlayer, eyePos _unit, _nearestPlayer, _unit];
+                        private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
                         _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
                     };
 
