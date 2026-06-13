@@ -28,6 +28,7 @@ class CfgFunctions {
             class createStatusWindow {};
             class updateStatusWindow {};
             class setCullerEnabled {};
+            class applySettings    {};
         };
     };
 };
