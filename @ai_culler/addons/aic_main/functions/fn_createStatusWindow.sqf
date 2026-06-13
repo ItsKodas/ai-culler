@@ -3,7 +3,7 @@ params ["_display"];
 if (isNull _display) exitWith {};
 
 // Remove existing controls (idempotent)
-{ ctrlDelete (_display displayCtrl _x); } forEach [9200,9201,9202,9203,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220,9221];
+{ ctrlDelete (_display displayCtrl _x); } forEach [9200,9201,9202,9203,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220,9221,9222,9223,9224,9225,9226,9227,9228];
 
 private _wx = safeZoneX + 0.35;
 private _y  = safeZoneY + 0.07;
@@ -11,7 +11,7 @@ private _w  = 0.255;
 private _rH = 0.033;
 private _tH = 0.036;
 
-// Background — 8 rows when settings closed, 14 when settings open
+// Background — 8 rows when settings closed, 18 when settings open
 private _bg = _display ctrlCreate ["RscText", 9200];
 _bg ctrlSetPosition [_wx, _y, _w, _tH + (_rH * 8) + 0.012];
 _bg ctrlSetBackgroundColor [0, 0, 0, 0.78];
@@ -43,13 +43,13 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
 
     if (_collapse) then {
         { (_disp displayCtrl _x) ctrlShow false; (_disp displayCtrl _x) ctrlCommit 0; }
-            forEach [9203,9204,9205,9206,9207,9221,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+            forEach [9203,9204,9205,9206,9207,9221,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
     } else {
         { (_disp displayCtrl _x) ctrlShow true; (_disp displayCtrl _x) ctrlCommit 0; }
             forEach [9203,9204,9205,9206,9207,9221,9208,9209];
         if ((_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false]) then {
             { (_disp displayCtrl _x) ctrlShow true; (_disp displayCtrl _x) ctrlCommit 0; }
-                forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+                forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
         };
     };
 
@@ -63,7 +63,7 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
         if (_collapse) then {
             _tH2 + 0.004
         } else {
-            if (_sOpen) then {_tH2 + (_rH2 * 14) + 0.012} else {_tH2 + (_rH2 * 8) + 0.012}
+            if (_sOpen) then {_tH2 + (_rH2 * 18) + 0.012} else {_tH2 + (_rH2 * 8) + 0.012}
         }
     ];
     _bg2 ctrlCommit 0;
@@ -109,14 +109,19 @@ _settingsToggle ctrlAddEventHandler ["ButtonClick", {
 
     if (_open) then {
         (_disp displayCtrl 9211) ctrlSetText str AIC_maxActiveAI;
-        (_disp displayCtrl 9213) ctrlSetText str AIC_distOpfor;
-        (_disp displayCtrl 9215) ctrlSetText str AIC_distIndependent;
-        (_disp displayCtrl 9217) ctrlSetText str AIC_distCivilian;
-        (_disp displayCtrl 9219) ctrlSetText str AIC_checkInterval;
+        (_disp displayCtrl 9213) ctrlSetText str AIC_distBlufor;
+        (_disp displayCtrl 9215) ctrlSetText str AIC_distOpfor;
+        (_disp displayCtrl 9217) ctrlSetText str AIC_distIndependent;
+        (_disp displayCtrl 9219) ctrlSetText str AIC_distCivilian;
+        (_disp displayCtrl 9223) ctrlSetText str AIC_checkInterval;
+        (_disp displayCtrl 9225) ctrlSetText str AIC_minActiveRadius;
+        (_disp displayCtrl 9228) ctrlSetText str AIC_combatRadius;
+        (_disp displayCtrl 9226) ctrlSetText (if (AIC_debug) then {"Debug: ON"} else {"Debug: OFF"});
+        (_disp displayCtrl 9226) setVariable ["AIC_debugEnabled", AIC_debug];
     };
 
     { (_disp displayCtrl _x) ctrlShow _open; (_disp displayCtrl _x) ctrlCommit 0; }
-        forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+        forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
 
     private _bg3  = _disp displayCtrl 9200;
     private _pos3 = ctrlPosition _bg3;
@@ -124,18 +129,22 @@ _settingsToggle ctrlAddEventHandler ["ButtonClick", {
     private _rH3  = 0.033;
     _bg3 ctrlSetPosition [
         _pos3 select 0, _pos3 select 1, _pos3 select 2,
-        if (_open) then {_tH3 + (_rH3 * 14) + 0.012} else {_tH3 + (_rH3 * 8) + 0.012}
+        if (_open) then {_tH3 + (_rH3 * 18) + 0.012} else {_tH3 + (_rH3 * 8) + 0.012}
     ];
     _bg3 ctrlCommit 0;
 }];
 
-// Settings sub-section — label + edit pairs, rows 8–12 (initially hidden)
+// Settings sub-section — label + edit pairs, rows 8–15 (initially hidden)
+// Row layout: MaxAI, DistBlufor, DistOpfor, DistIndep, DistCiv, Interval, MinRadius, CombatRad
 private _settingsDefs = [
     ["Max AI:",      9210, 9211],
-    ["Dist OPFOR:",  9212, 9213],
-    ["Dist Indep:",  9214, 9215],
-    ["Dist Civ:",    9216, 9217],
-    ["Interval(s):", 9218, 9219]
+    ["Dist BLUFOR:", 9212, 9213],
+    ["Dist OPFOR:",  9214, 9215],
+    ["Dist Indep:",  9216, 9217],
+    ["Dist Civ:",    9218, 9219],
+    ["Interval(s):", 9222, 9223],
+    ["Min Radius:",  9224, 9225],
+    ["Combat Rad:",  9227, 9228]
 ];
 private _lW = 0.135;
 private _eX = _wx + 0.007 + _lW + 0.004;
@@ -160,9 +169,26 @@ private _eW = _w - 0.007 - _lW - 0.004 - 0.007;
     _edtCtrl ctrlCommit 0;
 } forEach _settingsDefs;
 
-// Apply button (row 13, initially hidden)
+// Debug toggle button (row 16, initially hidden)
+private _debugBtn = _display ctrlCreate ["RscButton", 9226];
+_debugBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 16), _w - 0.014, _rH - 0.004];
+_debugBtn ctrlSetText (if (AIC_debug) then {"Debug: ON"} else {"Debug: OFF"});
+_debugBtn ctrlCommit 0;
+_debugBtn ctrlShow false;
+_debugBtn ctrlCommit 0;
+_debugBtn setVariable ["AIC_debugEnabled", AIC_debug];
+
+_debugBtn ctrlAddEventHandler ["ButtonClick", {
+    params ["_btn"];
+    private _newVal = !(_btn getVariable ["AIC_debugEnabled", AIC_debug]);
+    _btn setVariable ["AIC_debugEnabled", _newVal];
+    _btn ctrlSetText (if (_newVal) then {"Debug: ON"} else {"Debug: OFF"});
+    _btn ctrlCommit 0;
+}];
+
+// Apply button (row 17, initially hidden)
 private _applyBtn = _display ctrlCreate ["RscButton", 9220];
-_applyBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 13), _w - 0.014, _rH - 0.004];
+_applyBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 17), _w - 0.014, _rH - 0.004];
 _applyBtn ctrlSetText "Apply";
 _applyBtn ctrlCommit 0;
 _applyBtn ctrlShow false;
@@ -170,11 +196,15 @@ _applyBtn ctrlCommit 0;
 
 _applyBtn ctrlAddEventHandler ["ButtonClick", {
     params ["_btn"];
-    private _disp     = ctrlParent _btn;
-    private _maxAI    = parseNumber ctrlText (_disp displayCtrl 9211);
-    private _distO    = parseNumber ctrlText (_disp displayCtrl 9213);
-    private _distI    = parseNumber ctrlText (_disp displayCtrl 9215);
-    private _distC    = parseNumber ctrlText (_disp displayCtrl 9217);
-    private _interval = parseNumber ctrlText (_disp displayCtrl 9219);
-    [_maxAI, _distO, _distI, _distC, _interval] remoteExecCall ["AIC_fnc_applySettings", 2];
+    private _disp      = ctrlParent _btn;
+    private _maxAI     = parseNumber ctrlText (_disp displayCtrl 9211);
+    private _distB     = parseNumber ctrlText (_disp displayCtrl 9213);
+    private _distO     = parseNumber ctrlText (_disp displayCtrl 9215);
+    private _distI     = parseNumber ctrlText (_disp displayCtrl 9217);
+    private _distC     = parseNumber ctrlText (_disp displayCtrl 9219);
+    private _interval  = parseNumber ctrlText (_disp displayCtrl 9223);
+    private _minRad    = parseNumber ctrlText (_disp displayCtrl 9225);
+    private _combatRad = parseNumber ctrlText (_disp displayCtrl 9228);
+    private _debug     = (_disp displayCtrl 9226) getVariable ["AIC_debugEnabled", AIC_debug];
+    [_maxAI, _distB, _distO, _distI, _distC, _interval, _minRad, _combatRad, _debug] remoteExecCall ["AIC_fnc_applySettings", 2];
 }];

@@ -54,24 +54,23 @@ while {true} do {
             };
         } forEach _refPoints;
 
-        if (_nearestDist > _cullDist) then {
-            // Out of range — cull
-            _outOfRange pushBack [_unit, _nearestDist];
-        } else {
-            if (_nearestDist <= AIC_minActiveRadius || (group _unit) getVariable ["AIC_zeusWaypoint", false]) then {
-                // Proximity override (200 m) or Zeus-assigned waypoint — always active, skip raycast
-                _inRangeLOS pushBack [_unit, _nearestDist];
-            } else {
-                // Combat check: if hostile non-civilian AI are nearby, keep active so AI vs AI fights resolve
-                // Civilians are excluded — they don't trigger combat activation
-                private _inCombat = side _unit != civilian && {
-                    _unit nearEntities [["Man"], AIC_combatRadius] findIf {
-                        alive _x && !isPlayer _x && side _x != civilian &&
-                        (side _x getFriend side _unit) < 0.6
-                    } != -1
-                };
+        private _inCombat = side _unit != civilian && {
+            _unit nearEntities [["Man"], AIC_combatRadius] findIf {
+                alive _x && !isPlayer _x && side _x != civilian &&
+                (side _x getFriend side _unit) < 0.6
+            } != -1
+        };
 
-                if (_inCombat) then {
+        if ((group _unit) getVariable ["AIC_zeusWaypoint", false] || _inCombat) then {
+            // Zeus-assigned waypoint or AI vs AI combat — active regardless of player proximity
+            _inRangeLOS pushBack [_unit, _nearestDist];
+        } else {
+            if (_nearestDist > _cullDist) then {
+                // Out of range — cull
+                _outOfRange pushBack [_unit, _nearestDist];
+            } else {
+                if (_nearestDist <= AIC_minActiveRadius) then {
+                    // Within minimum active radius — always active, skip raycast
                     _inRangeLOS pushBack [_unit, _nearestDist];
                 } else {
                     // LOS check against nearest player body

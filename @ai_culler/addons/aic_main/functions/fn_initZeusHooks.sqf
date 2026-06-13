@@ -14,10 +14,12 @@ if (!hasInterface) exitWith {};
             if (_key == 14) then {
                 private _bg = _disp displayCtrl 9200;
                 if (!isNull _bg) then {
-                    if (ctrlVisible _bg) then {
+                    if (!(_bg getVariable ["AIC_hidden", false])) then {
+                        _bg setVariable ["AIC_hidden", true];
                         { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow false; _c ctrlCommit 0; }; }
-                            forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+                            forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
                     } else {
+                        _bg setVariable ["AIC_hidden", false];
                         private _collapsed    = (_disp displayCtrl 9202) getVariable ["AIC_collapsed", false];
                         private _settingsOpen = (_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false];
                         { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
