@@ -55,7 +55,7 @@ while {true} do {
     } forEach _allAI;
 
     _outOfRange   = [_outOfRange,   [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
-    _inRangeNoLOS = [_inRangeNoLOS, [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
+    _inRangeNoLOS = [_inRangeNoLOS, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
 
     { [_x select 0] call AIC_fnc_disableUnit; } forEach _outOfRange;
 
