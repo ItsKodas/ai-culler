@@ -54,7 +54,9 @@ class CfgFunctions {
 class CfgVehicles {
 
     // --- Placement attribute panel definition ---
-    class AIC_CuratorInfo_Man {
+    class All {};
+    class AIC_CuratorInfo_Man : All {
+        scope = 0;
 
         // SQF executed when Zeus confirms placement.
         // _this == [placedObjects, curatorObject]

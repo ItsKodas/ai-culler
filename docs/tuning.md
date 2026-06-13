@@ -1,98 +1,110 @@
-# AI Culler — Setup & Tuning Guide
+# AI Culler — Tuning Guide
 
-## Installation
-
-1. Copy the `ai-culler` folder into your mission directory
-2. Add the following to your mission's `init.sqf`:
-
-```sqf
-if (isServer) then {
-    [] spawn {
-        sleep 5;
-        call compile preprocessFileLineNumbers "src\AI_Culler.sqf";
-    };
-};
-```
-
-If you already have an `init.sqf`, just append those lines.
-
----
-
-## Configuration
-
-All tunable values are in `config/settings.sqf`.
+## Quick Reference
 
 | Variable | Default | Description |
 |---|---|---|
-| `AI_Culler_maxActiveAI` | 80 | Hard cap on simultaneously active AI across all factions |
-| `AI_Culler_distOpfor` | 1000m | Cull distance for Opfor (east) |
-| `AI_Culler_distIndependent` | 800m | Cull distance for Independent (resistance) |
-| `AI_Culler_distCivilian` | 400m | Cull distance for Civilians |
-| `AI_Culler_checkInterval` | 5s | How often the culler runs |
-| `AI_Culler_debug` | true | RPT logging on/off |
+| `AIC_maxActiveAI` | 80 | Hard cap on simultaneously active AI |
+| `AIC_distOpfor` | 1000m | Cull distance for Opfor (east) |
+| `AIC_distIndependent` | 800m | Cull distance for Independent |
+| `AIC_distCivilian` | 400m | Cull distance for Civilians |
+| `AIC_checkInterval` | 5s | How often the culler runs (seconds) |
+| `AIC_debug` | true | RPT logging — disable for live ops |
 
 ---
 
-## Tuning Per Mission
+## Changing Settings
 
-### Small op (30 players, light AI)
+### Mid-op (no rebuild needed)
+
+Open Zeus → click **Settings** in the status window. Edit any value and click **Apply**. Changes take effect on the next culler tick and sync to all connected Zeus clients.
+
+Use this to dial in values during a running op without restarting.
+
+### Changing defaults (requires PBO rebuild)
+
+Edit `@ai_culler/addons/aic_main/functions/fnc_preInit.sqf`. These are the values that load at mission start before any Zeus adjustments.
+
+---
+
+## Tuning by Op Size
+
+### Small op (≤30 players, light AI)
+
 ```sqf
-AI_Culler_maxActiveAI = 120;
-AI_Culler_distOpfor   = 1200;
+AIC_maxActiveAI = 120;
+AIC_distOpfor   = 1200;
 ```
 
-### Large op (60 players, heavy AI)
+More players means more eyes on the battlefield — you can afford a higher cap and wider distance before performance suffers.
+
+### Large op (60+ players, heavy AI)
+
 ```sqf
-AI_Culler_maxActiveAI = 80;
-AI_Culler_distOpfor   = 1000;
+AIC_maxActiveAI = 80;
+AIC_distOpfor   = 1000;
 ```
+
+The defaults are tuned for this scenario.
 
 ### Dense civilian presence
+
 ```sqf
-AI_Culler_distCivilian = 300; // Tighten further to reduce overhead
+AIC_distCivilian = 300;
 ```
 
----
+Civilians are cheap AI but still contribute to the count. Tightening their cull radius keeps headroom for the units that matter.
 
-## Zeus Usage
+### Tight server headroom
 
-Any unit placed by Zeus via the curator interface is automatically flagged as protected and will never be culled.
-
-To manually protect a pre-placed unit add to its init line:
 ```sqf
-this setVariable ["zeusProtected", true, true];
+AIC_maxActiveAI  = 60;
+AIC_checkInterval = 3;
 ```
+
+Drop the cap further and check more frequently so the culler responds faster to player movement.
 
 ---
 
 ## Reading RPT Logs
 
-With `AI_Culler_debug = true` the following is logged every cycle:
+With `AIC_debug = true` the following is logged every tick:
 
 ```
-[AI_Culler] Active: 74 / 80 | LOS: 12 | No-LOS: 62 | Out of range: 45 | Culled: 71
+[AIC] Active: 74 / 80 | LOS: 12 | No-LOS: 62 | Out of range: 45 | Protected: 8 | Culled: 71
 ```
 
 | Field | Meaning |
 |---|---|
 | Active | Total currently simulating |
-| LOS | Units visible to at least one player |
+| LOS | In range, at least one player has line of sight |
 | No-LOS | In range but no player LOS |
-| Out of range | Beyond faction cull distance |
-| Culled | Total disabled this cycle |
+| Out of range | Beyond faction cull distance — always disabled |
+| Protected | Units marked zeusProtected — excluded from culling |
+| Culled | Total disabled this tick |
 
-Turn off debug logging for live ops once you're happy with the tuning:
+If **Active** consistently hits the cap and **No-LOS** is large, lower `AIC_distOpfor` to shrink the no-LOS pool, or raise `AIC_maxActiveAI` if the server can handle it.
+
+If **Out of range** is always near zero, your distances are tighter than needed — widen them to give Zeus more room to work with distant objectives.
+
+Disable debug logging for live ops once you're happy with the tuning:
+
 ```sqf
-AI_Culler_debug = false;
+// in fnc_preInit.sqf
+AIC_debug = false;
 ```
 
 ---
 
-## Compatibility
+## Zeus Protection
 
-- ✅ LAMBS Danger
-- ✅ Headless Clients (run culler on server, HC owns groups as normal)
-- ✅ Civilian Presence Module
-- ✅ Zeus / Curator
-- ✅ ACE3
-- ⚠️ Vcom AI — not tested, may conflict
+Units marked as protected are excluded from the culler pool entirely — they always simulate regardless of distance, LOS, or the active cap.
+
+**At placement:** Tick "Protect from culler" in the Zeus placement panel before confirming. Applies to all units placed in that batch.
+
+**On existing units:** Right-click the unit in Zeus → **Toggle Culler Protection**. Confirmation appears in system chat.
+
+**Via script** (e.g. mission init or trigger):
+```sqf
+_unit setVariable ["zeusProtected", true, true];
+```

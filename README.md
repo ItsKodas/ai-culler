@@ -32,7 +32,23 @@ Vehicles are never culled regardless of distance or LOS.
 
 ## Configuration
 
-Edit `@ai_culler/addons/aic_main/functions/fnc_preInit.sqf` and rebuild the PBO to adjust settings:
+### Mid-op (Zeus settings panel)
+
+Open Zeus → click **"Settings"** in the status window to adjust values live without restarting:
+
+| Field | Variable | Default |
+|---|---|---|
+| Max AI | `AIC_maxActiveAI` | 80 |
+| Dist OPFOR | `AIC_distOpfor` | 1000m |
+| Dist Indep | `AIC_distIndependent` | 800m |
+| Dist Civ | `AIC_distCivilian` | 400m |
+| Interval(s) | `AIC_checkInterval` | 5s |
+
+Changes take effect on the next culler tick. Values sync to all connected Zeus clients via `publicVariable`.
+
+### Pre-op (edit defaults)
+
+To change the defaults that load at mission start, edit `@ai_culler/addons/aic_main/functions/fnc_preInit.sqf` and rebuild the PBO:
 
 | Variable | Default | Description |
 |---|---|---|
@@ -53,7 +69,10 @@ Edit `@ai_culler/addons/aic_main/functions/fnc_preInit.sqf` and rebuild the PBO 
 
 **On existing units:** Right-click any living AI infantry unit in Zeus → **"Toggle Culler Protection"**. Confirmation appears in system chat.
 
-**Status window:** Opens automatically when Zeus is active. Displays live stats — Active, LOS, No-LOS, Culled, Protected. Click ▲/▼ to collapse or expand. The **"Disable Culler / Enable Culler"** button pauses and resumes culling entirely — all previously culled AI are re-enabled when disabled.
+**Status window:** Opens automatically when Zeus is active. Displays live stats — Active, LOS, No-LOS, Culled, Protected. Click ▲/▼ to collapse or expand.
+
+- **Disable Culler / Enable Culler** — pauses and resumes culling entirely. All previously culled AI are re-enabled when disabled.
+- **Settings** — expands an inline panel to adjust Max AI, cull distances, and check interval live. Click Apply to push changes to the server immediately.
 
 ---
 
@@ -76,23 +95,28 @@ Edit `@ai_culler/addons/aic_main/functions/fnc_preInit.sqf` and rebuild the PBO 
     └── aic_main/
         ├── config.cpp
         └── functions/
-            ├── fnc_preInit.sqf           # Settings — edit to tune
-            ├── fnc_postInit.sqf          # Entry point (server + curator branching)
-            ├── fnc_mainLoop.sqf          # Main culler loop
-            ├── fnc_enableUnit.sqf
-            ├── fnc_disableUnit.sqf
-            ├── fnc_getCullDist.sqf
-            ├── fnc_broadcastStats.sqf    # Sends stats to Zeus clients each tick
-            ├── fnc_toggleProtection.sqf  # Right-click toggle handler
-            ├── fnc_setCullerEnabled.sqf  # Server-side culler on/off
-            ├── fnc_initZeusHooks.sqf     # Context action + status window lifecycle
-            ├── fnc_createStatusWindow.sqf
-            └── fnc_updateStatusWindow.sqf
+            ├── fn_preInit.sqf           # Settings — edit to tune
+            ├── fn_postInit.sqf          # Entry point (server + curator branching)
+            ├── fn_mainLoop.sqf          # Main culler loop
+            ├── fn_enableUnit.sqf
+            ├── fn_disableUnit.sqf
+            ├── fn_getCullDist.sqf
+            ├── fn_broadcastStats.sqf    # Sends stats to Zeus clients each tick
+            ├── fn_toggleProtection.sqf  # Right-click toggle handler
+            ├── fn_setCullerEnabled.sqf  # Server-side culler on/off
+            ├── fn_applySettings.sqf     # Server-side settings update (mid-op)
+            ├── fn_initZeusHooks.sqf     # Context action + status window lifecycle
+            ├── fn_createStatusWindow.sqf
+            └── fn_updateStatusWindow.sqf
 ```
 
 ---
 
 ## Changelog
+
+### v2.1.0
+- Added inline Settings panel to Zeus status window — adjust Max AI, cull distances, and check interval mid-op without rebuilding the PBO
+- Settings changes sync to all Zeus clients via `publicVariable`
 
 ### v2.0.0
 - Converted from mission script to standalone mod — no mission `init.sqf` required
