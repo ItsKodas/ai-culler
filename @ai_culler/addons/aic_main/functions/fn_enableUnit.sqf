@@ -3,7 +3,7 @@ params ["_unit"];
 if (_unit getVariable ["AIC_disabled", false]) then {
     _unit enableSimulationGlobal true;
     _unit enableAI "ALL";
-    _unit setVariable ["AIC_disabled", false];
+    _unit setVariable ["AIC_disabled", false, true];
 
     [_unit] remoteExec ["AIC_fnc_updateUnitLabel", 0];
 

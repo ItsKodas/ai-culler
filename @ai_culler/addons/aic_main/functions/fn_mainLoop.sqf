@@ -18,17 +18,35 @@ while {true} do {
         _x isKindOf "Man" &&
         !isPlayer _x &&
         (_x getVariable ["zeusProtected", false]) &&
-        (side _x in [east, resistance, civilian])
+        (side _x in [west, east, resistance, civilian])
     } count allUnits;
 
-    // Managed pool: living AI infantry, unprotected, correct factions
+    // Managed pool: living AI infantry, unprotected, all factions
     private _allAI = allUnits select {
         alive _x &&
         _x isKindOf "Man" &&
         !isPlayer _x &&
         !(_x getVariable ["zeusProtected", false]) &&
-        (side _x in [east, resistance, civilian])
+        (side _x in [west, east, resistance, civilian])
     };
+
+    // Register WaypointAdded EH on any new managed group — fires server-side for both
+    // Zeus group waypoints and single-unit waypoints (both target the group in Arma 3)
+    {
+        private _grp = group _x;
+        if !(_grp in AIC_waypointEHGroups) then {
+            _grp addEventHandler ["WaypointAdded", {
+                params ["_grp"];
+                {
+                    if (!(_x getVariable ["zeusProtected", false])) then {
+                        [_x] call AIC_fnc_enableUnit;
+                    };
+                    [_x] remoteExec ["AIC_fnc_updateUnitLabel", 0];
+                } forEach (units _grp);
+            }];
+            AIC_waypointEHGroups pushBack _grp;
+        };
+    } forEach _allAI;
 
     private _outOfRange   = [];
     private _inRangeNoLOS = [];
@@ -57,19 +75,32 @@ while {true} do {
                 // Proximity override (200 m) or group has active waypoints — always active, skip raycast
                 _inRangeLOS pushBack [_unit, _nearestDist];
             } else {
-                // LOS check against nearest player only (not all players)
-                // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
-                // lineIntersectsObjs ignores terrain trees naturally (they are terrain geometry, not objects)
-                private _hasLOS = !(terrainIntersectASL [eyePos _nearestPlayer, eyePos _unit]);
-                if (_hasLOS) then {
-                    private _hits = lineIntersectsObjs [eyePos _nearestPlayer, eyePos _unit, _nearestPlayer, _unit];
-                    _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                // Combat check: if hostile non-civilian AI are nearby, keep active so AI vs AI fights resolve
+                // Civilians are excluded — they don't trigger combat activation
+                private _inCombat = side _unit != civilian && {
+                    _unit nearEntities [["Man"], AIC_combatRadius] findIf {
+                        alive _x && !isPlayer _x && side _x != civilian &&
+                        (side _x getFriend side _unit) < 0.6
+                    } != -1
                 };
 
-                if (_hasLOS) then {
+                if (_inCombat) then {
                     _inRangeLOS pushBack [_unit, _nearestDist];
                 } else {
-                    _inRangeNoLOS pushBack [_unit, _nearestDist];
+                    // LOS check against nearest player only (not all players)
+                    // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
+                    // lineIntersectsObjs ignores terrain trees naturally (they are terrain geometry, not objects)
+                    private _hasLOS = !(terrainIntersectASL [eyePos _nearestPlayer, eyePos _unit]);
+                    if (_hasLOS) then {
+                        private _hits = lineIntersectsObjs [eyePos _nearestPlayer, eyePos _unit, _nearestPlayer, _unit];
+                        _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                    };
+
+                    if (_hasLOS) then {
+                        _inRangeLOS pushBack [_unit, _nearestDist];
+                    } else {
+                        _inRangeNoLOS pushBack [_unit, _nearestDist];
+                    };
                 };
             };
         };

@@ -2,14 +2,37 @@ if (!hasInterface) exitWith {};
 
 // Status window lifecycle: poll for Zeus display opening and closing
 [] spawn {
+    private _drawEH = -1;
     while {true} do {
         waitUntil { !isNull (findDisplay 312) };
         [findDisplay 312] call AIC_fnc_createStatusWindow;
 
-        // Refresh unit labels for units already in a culled or protected state
+        // Refresh name prefixes for units already flagged
         { if (alive _x && _x isKindOf "Man" && !isPlayer _x) then { [_x] call AIC_fnc_updateUnitLabel; }; } forEach allUnits;
 
+        // Draw floating 3D labels above protected/culled/overridden units — visible only to this Zeus client
+        _drawEH = addMissionEventHandler ["Draw3D", {
+            private _camPos = positionCameraToWorld [0,0,0];
+            {
+                private _prot = _x getVariable ["zeusProtected", false];
+                private _cull = _x getVariable ["AIC_disabled",  false];
+                private _over = !_cull && !_prot && count (waypoints (group _x)) > 0;
+                if (_prot || _cull || _over) then {
+                    if (_camPos distance _x < 800) then {
+                        private _color = [1.0, 0.55, 0.0, 1.0];
+                        private _label = "[Culled]";
+                        if (_over) then { _color = [0.0, 0.7, 1.0, 1.0]; _label = "[Override]"; };
+                        if (_prot) then { _color = [0.2, 1.0, 0.2, 1.0]; _label = "[Protected]"; };
+                        drawIcon3D ["", _color, (ASLToAGL getPosASLVisual _x) vectorAdd [0, 0, 2.5], 0, 0, 0, _label, 2, 0.035, "RobotoCondensed"];
+                    };
+                };
+            } forEach allUnits;
+        }];
+
         waitUntil { isNull (findDisplay 312) };
+
+        removeMissionEventHandler ["Draw3D", _drawEH];
+        _drawEH = -1;
     };
 };
 

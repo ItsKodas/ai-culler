@@ -4,8 +4,10 @@ AIC_distIndependent  = 800;
 AIC_distCivilian     = 400;
 AIC_checkInterval    = 5;
 AIC_minActiveRadius  = 200;
+AIC_combatRadius     = 500;
 AIC_debug            = true;
 AIC_cullerEnabled    = true;
+AIC_waypointEHGroups = [];
 
 if (AIC_debug) then {
     diag_log "[AIC] Settings initialised";
