@@ -5,16 +5,14 @@ if !(_units isEqualType []) then { _units = [_units]; };
 _units = _units select { alive _x && _x isKindOf "Man" && !isPlayer _x };
 if (count _units == 0) exitWith {};
 
-private _zeusClients = allPlayers select { isPlayer _x && !isNull (getAssignedCuratorLogic _x) };
-
 {
     private _unit     = _x;
     private _newState = !(_unit getVariable ["zeusProtected", false]);
     _unit setVariable ["zeusProtected", _newState, true];
-
-    if (count _zeusClients > 0) then {
-        [_unit] remoteExec ["AIC_fnc_updateUnitLabel", _zeusClients];
+    if (_newState && (_unit getVariable ["AIC_disabled", false])) then {
+        [_unit] call AIC_fnc_enableUnit;
     };
+    [_unit] remoteExec ["AIC_fnc_updateUnitLabel", 0];
 
     if (AIC_debug) then {
         diag_log format ["[AIC] zeusProtected %1 -> %2", _unit, _newState];
