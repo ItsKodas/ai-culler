@@ -37,26 +37,40 @@ while {true} do {
     {
         private _unit     = _x;
         private _cullDist = [_unit] call AIC_fnc_getCullDist;
-        private _nearestDist = 99999;
-        private _hasLOS      = false;
 
+        // Pass 1: find nearest player with cheap distance math only
+        private _nearestDist   = 99999;
+        private _nearestPlayer = objNull;
         {
-            private _dist = _x distance _unit;
-            if (_dist < _nearestDist) then { _nearestDist = _dist; };
-            if (_dist < _cullDist && !_hasLOS) then {
-                if ((lineIntersectsSurfaces [eyePos _x, eyePos _unit, _x, _unit]) isEqualTo []) then {
-                    _hasLOS = true;
-                };
+            private _d = _unit distance _x;
+            if (_d < _nearestDist) then {
+                _nearestDist   = _d;
+                _nearestPlayer = _x;
             };
         } forEach _players;
 
         if (_nearestDist > _cullDist) then {
+            // Out of range — cull
             _outOfRange pushBack [_unit, _nearestDist];
         } else {
-            if (_hasLOS) then {
+            if (_nearestDist <= AIC_minActiveRadius || count (waypoints (group _unit)) > 0) then {
+                // Proximity override (200 m) or group has active waypoints — always active, skip raycast
                 _inRangeLOS pushBack [_unit, _nearestDist];
             } else {
-                _inRangeNoLOS pushBack [_unit, _nearestDist];
+                // LOS check against nearest player only (not all players)
+                // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
+                // lineIntersectsObjs ignores terrain trees naturally (they are terrain geometry, not objects)
+                private _hasLOS = !(terrainIntersectASL [eyePos _nearestPlayer, eyePos _unit]);
+                if (_hasLOS) then {
+                    private _hits = lineIntersectsObjs [eyePos _nearestPlayer, eyePos _unit, _nearestPlayer, _unit];
+                    _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                };
+
+                if (_hasLOS) then {
+                    _inRangeLOS pushBack [_unit, _nearestDist];
+                } else {
+                    _inRangeNoLOS pushBack [_unit, _nearestDist];
+                };
             };
         };
     } forEach _allAI;
