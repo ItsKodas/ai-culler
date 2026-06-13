@@ -1,4 +1,4 @@
-params ["_activeCount", "_losCount", "_noLosCount", "_outOfRangeCount", "_protectedCount", "_culledCount"];
+params ["_activeCount", "_losCount", "_noLosCount", "_outOfRangeCount", "_protectedCount", "_culledCount", "_overrideCount"];
 
 private _display = findDisplay 312;
 if (isNull _display) exitWith {};
@@ -8,11 +8,12 @@ private _texts = [
     format ["LOS: %1",         _losCount],
     format ["No-LOS: %1",      _noLosCount],
     format ["Culled: %1",      _culledCount],
-    format ["Protected: %1",   _protectedCount]
+    format ["Protected: %1",   _protectedCount],
+    format ["Override: %1",    _overrideCount]
 ];
 
 {
-    private _ctrl = _display displayCtrl ([9203,9204,9205,9206,9207] select _forEachIndex);
+    private _ctrl = _display displayCtrl ([9203,9204,9205,9206,9207,9221] select _forEachIndex);
     if (!isNull _ctrl) then {
         _ctrl ctrlSetText _x;
         _ctrl ctrlCommit 0;

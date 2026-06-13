@@ -4,7 +4,7 @@ if (!hasInterface || isNull (getAssignedCuratorLogic player)) exitWith {};
 
 private _protected = _unit getVariable ["zeusProtected", false];
 private _culled    = _unit getVariable ["AIC_disabled",  false];
-private _override  = !_culled && !_protected && count (waypoints (group _unit)) > 0;
+private _override  = !_culled && !_protected && (group _unit) getVariable ["AIC_zeusWaypoint", false];
 
 private _origName = _unit getVariable ["AIC_origName", ""];
 if (_origName isEqualTo "") then {

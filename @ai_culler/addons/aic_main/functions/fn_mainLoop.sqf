@@ -64,8 +64,8 @@ while {true} do {
             // Out of range — cull
             _outOfRange pushBack [_unit, _nearestDist];
         } else {
-            if (_nearestDist <= AIC_minActiveRadius || count (waypoints (group _unit)) > 0) then {
-                // Proximity override (200 m) or group has active waypoints — always active, skip raycast
+            if (_nearestDist <= AIC_minActiveRadius || (group _unit) getVariable ["AIC_zeusWaypoint", false]) then {
+                // Proximity override (200 m) or Zeus-assigned waypoint — always active, skip raycast
                 _inRangeLOS pushBack [_unit, _nearestDist];
             } else {
                 // Combat check: if hostile non-civilian AI are nearby, keep active so AI vs AI fights resolve
@@ -80,19 +80,25 @@ while {true} do {
                 if (_inCombat) then {
                     _inRangeLOS pushBack [_unit, _nearestDist];
                 } else {
-                    // LOS check against nearest reference point (player body or Zeus camera)
-                    // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
-                    // lineIntersectsObjs ignores terrain trees naturally (they are terrain geometry, not objects)
-                    private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
-                    if (_hasLOS) then {
-                        private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
-                        _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
-                    };
-
-                    if (_hasLOS) then {
+                    if (isNull _nearestPlayer) then {
+                        // Nearest reference is a Zeus camera (no player body) — aerial view has
+                        // trivial LOS to any ground unit, so skip the raycast and keep active
                         _inRangeLOS pushBack [_unit, _nearestDist];
                     } else {
-                        _inRangeNoLOS pushBack [_unit, _nearestDist];
+                        // LOS check against nearest player body
+                        // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
+                        // lineIntersectsObjs ignores terrain trees naturally (terrain geometry, not objects)
+                        private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
+                        if (_hasLOS) then {
+                            private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
+                            _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                        };
+
+                        if (_hasLOS) then {
+                            _inRangeLOS pushBack [_unit, _nearestDist];
+                        } else {
+                            _inRangeNoLOS pushBack [_unit, _nearestDist];
+                        };
                     };
                 };
             };
@@ -120,18 +126,19 @@ while {true} do {
         };
     } forEach _inRangeNoLOS;
 
-    private _culledCount = (count _allAI) - _activeCount;
+    private _culledCount    = (count _allAI) - _activeCount;
+    private _overrideCount  = { (group _x) getVariable ["AIC_zeusWaypoint", false] } count _allAI;
 
     if (AIC_debug) then {
         diag_log format [
-            "[AIC] Active: %1 / %2 | LOS: %3 | No-LOS: %4 | Out of range: %5 | Protected: %6 | Culled: %7",
+            "[AIC] Active: %1 / %2 | LOS: %3 | No-LOS: %4 | Out: %5 | Protected: %6 | Culled: %7 | Override: %8",
             _activeCount, AIC_maxActiveAI,
             count _inRangeLOS, count _inRangeNoLOS,
-            count _outOfRange, _protectedCount, _culledCount
+            count _outOfRange, _protectedCount, _culledCount, _overrideCount
         ];
     };
 
-    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount]
+    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount]
         call AIC_fnc_broadcastStats;
 
     sleep AIC_checkInterval;

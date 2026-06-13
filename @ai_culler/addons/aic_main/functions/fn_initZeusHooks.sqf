@@ -7,6 +7,35 @@ if (!hasInterface) exitWith {};
         waitUntil { !isNull (findDisplay 312) };
         [findDisplay 312] call AIC_fnc_createStatusWindow;
 
+        // Mirror Backspace HUD toggle: hide/show AIC panel when Zeus hides/shows its own HUD
+        // DIK 14 = Backspace. Returning false lets Zeus still toggle its own controls.
+        (findDisplay 312) displayAddEventHandler ["KeyDown", {
+            params ["_disp", "_key"];
+            if (_key == 14) then {
+                private _bg = _disp displayCtrl 9200;
+                if (!isNull _bg) then {
+                    if (ctrlVisible _bg) then {
+                        { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow false; _c ctrlCommit 0; }; }
+                            forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+                    } else {
+                        private _collapsed    = (_disp displayCtrl 9202) getVariable ["AIC_collapsed", false];
+                        private _settingsOpen = (_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false];
+                        { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                            forEach [9200,9201,9202];
+                        if (!_collapsed) then {
+                            { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                                forEach [9203,9204,9205,9206,9207,9221,9208,9209];
+                            if (_settingsOpen) then {
+                                { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                                    forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
+                            };
+                        };
+                    };
+                };
+            };
+            false
+        }];
+
         // Broadcast camera position to server every 3 s so the culler treats Zeus view as a proximity anchor
         [] spawn {
             while { !isNull (findDisplay 312) } do {
@@ -25,7 +54,7 @@ if (!hasInterface) exitWith {};
             {
                 private _prot = _x getVariable ["zeusProtected", false];
                 private _cull = _x getVariable ["AIC_disabled",  false];
-                private _over = !_cull && !_prot && count (waypoints (group _x)) > 0;
+                private _over = !_cull && !_prot && (group _x) getVariable ["AIC_zeusWaypoint", false];
                 if (_prot || _cull || _over) then {
                     if (_camPos distance _x < 800) then {
                         private _color = [1.0, 0.55, 0.0, 1.0];
