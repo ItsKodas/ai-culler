@@ -39,7 +39,7 @@ Open Zeus → click **"Settings"** in the status window to adjust values live wi
 | Field | Variable | Default |
 |---|---|---|
 | Max AI | `AIC_maxActiveAI` | 80 |
-| Dist OPFOR | `AIC_distOpfor` | 1000m |
+| Dist OPFOR | `AIC_distOpfor` | 2000m |
 | Dist Indep | `AIC_distIndependent` | 800m |
 | Dist Civ | `AIC_distCivilian` | 400m |
 | Interval(s) | `AIC_checkInterval` | 5s |

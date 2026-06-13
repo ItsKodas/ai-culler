@@ -5,7 +5,7 @@
 | Variable | Default | Description |
 |---|---|---|
 | `AIC_maxActiveAI` | 80 | Hard cap on simultaneously active AI |
-| `AIC_distOpfor` | 1000m | Cull distance for Opfor (east) |
+| `AIC_distOpfor` | 2000m | Cull distance for Opfor (east) |
 | `AIC_distIndependent` | 800m | Cull distance for Independent |
 | `AIC_distCivilian` | 400m | Cull distance for Civilians |
 | `AIC_checkInterval` | 5s | How often the culler runs (seconds) |

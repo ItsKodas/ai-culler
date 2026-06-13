@@ -1,5 +1,5 @@
 AIC_maxActiveAI     = 80;
-AIC_distOpfor       = 1000;
+AIC_distOpfor       = 2000;
 AIC_distIndependent = 800;
 AIC_distCivilian    = 400;
 AIC_checkInterval   = 5;

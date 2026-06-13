@@ -27,10 +27,20 @@ class CfgFunctions {
             class initZeusHooks    {};
             class createStatusWindow {};
             class updateStatusWindow {};
-            class setCullerEnabled {};
-            class applySettings    {};
+            class setCullerEnabled  {};
+            class applySettings     {};
+            class updateUnitLabel   {};
         };
     };
 };
 
-
+class CfgCuratorContextActions {
+    class AIC_ToggleProtection {
+        displayName = "Toggle Culler Protection";
+        icon = "";
+        priority = 10;
+        cursorOver = "";
+        condition = "{ alive _x && !isPlayer _x && (_x isKindOf 'Man') } count (_this select 2) > 0";
+        statement = "[_this select 2] remoteExec ['AIC_fnc_toggleProtection', 2];";
+    };
+};
