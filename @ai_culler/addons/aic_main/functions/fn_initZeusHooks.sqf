@@ -36,15 +36,6 @@ if (!hasInterface) exitWith {};
             false
         }];
 
-        // Broadcast camera position to server every 3 s so the culler treats Zeus view as a proximity anchor
-        [] spawn {
-            while { !isNull (findDisplay 312) } do {
-                player setVariable ["AIC_zeusPos", positionCameraToWorld [0,0,0], true];
-                sleep 3;
-            };
-            player setVariable ["AIC_zeusPos", nil, true];
-        };
-
         // Refresh name prefixes for units already flagged
         { if (alive _x && _x isKindOf "Man" && !isPlayer _x) then { [_x] call AIC_fnc_updateUnitLabel; }; } forEach allUnits;
 

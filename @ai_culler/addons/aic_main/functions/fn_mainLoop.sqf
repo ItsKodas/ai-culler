@@ -12,14 +12,8 @@ while {true} do {
 
     private _players = allPlayers select { isPlayer _x };
 
-    // Reference points for distance / LOS checks: player eye positions + active Zeus camera positions.
-    // Zeus camera positions are broadcast from clients via AIC_zeusPos so the server can read them.
-    // Each entry: [worldPos (ASL), playerObjOrObjNull]
+    // Reference points: player eye positions only. Each entry: [eyePosASL, playerObj]
     private _refPoints = _players apply { [eyePos _x, _x] };
-    {
-        private _camPos = _x getVariable ["AIC_zeusPos", []];
-        if (count _camPos > 0) then { _refPoints pushBack [_camPos, objNull]; };
-    } forEach _players;
 
     // Count protected infantry before the main filter excludes them
     private _protectedCount = {
@@ -80,25 +74,18 @@ while {true} do {
                 if (_inCombat) then {
                     _inRangeLOS pushBack [_unit, _nearestDist];
                 } else {
-                    if (isNull _nearestPlayer) then {
-                        // Nearest reference is a Zeus camera (no player body) — aerial view has
-                        // trivial LOS to any ground unit, so skip the raycast and keep active
+                    // LOS check against nearest player body
+                    // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
+                    private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
+                    if (_hasLOS) then {
+                        private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
+                        _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                    };
+
+                    if (_hasLOS) then {
                         _inRangeLOS pushBack [_unit, _nearestDist];
                     } else {
-                        // LOS check against nearest player body
-                        // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
-                        // lineIntersectsObjs ignores terrain trees naturally (terrain geometry, not objects)
-                        private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
-                        if (_hasLOS) then {
-                            private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
-                            _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
-                        };
-
-                        if (_hasLOS) then {
-                            _inRangeLOS pushBack [_unit, _nearestDist];
-                        } else {
-                            _inRangeNoLOS pushBack [_unit, _nearestDist];
-                        };
+                        _inRangeNoLOS pushBack [_unit, _nearestDist];
                     };
                 };
             };
