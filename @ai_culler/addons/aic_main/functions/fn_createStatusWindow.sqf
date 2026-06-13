@@ -5,7 +5,7 @@ if (isNull _display) exitWith {};
 // Remove existing controls (idempotent)
 { ctrlDelete (_display displayCtrl _x); } forEach [9200,9201,9202,9203,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
 
-private _wx = safeZoneX + 0.225;
+private _wx = safeZoneX + 0.30;
 private _y  = safeZoneY + 0.07;
 private _w  = 0.255;
 private _rH = 0.033;
@@ -28,6 +28,8 @@ _title ctrlCommit 0;
 private _collapseBtn = _display ctrlCreate ["RscButton", 9202];
 _collapseBtn ctrlSetPosition [_wx + _w - 0.042, _y + 0.002, 0.037, _tH - 0.004];
 _collapseBtn ctrlSetText "▲";
+_collapseBtn ctrlSetTextColor [1, 1, 1, 1];
+_collapseBtn ctrlSetBackgroundColor [0.08, 0.08, 0.08, 1];
 _collapseBtn ctrlCommit 0;
 _collapseBtn setVariable ["AIC_collapsed", false];
 
