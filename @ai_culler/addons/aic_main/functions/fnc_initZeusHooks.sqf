@@ -1,3 +1,5 @@
+if (!hasInterface) exitWith {};
+
 // Context action: toggle culler protection on AI infantry
 {
     _x addCuratorContextAction [
