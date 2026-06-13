@@ -63,10 +63,6 @@ To change the defaults that load at mission start, edit `@ai_culler/addons/aic_m
 
 ## Zeus Usage
 
-**At placement:** A "Protect from culler" checkbox appears in the Zeus placement panel for infantry. Tick it before confirming placement — that unit will never be culled.
-
-> ⚠️ Requires Config Viewer verification before use — see `config.cpp` comments for details.
-
 **On existing units:** Right-click any living AI infantry unit in Zeus → **"Toggle Culler Protection"**. Confirmation appears in system chat.
 
 **Status window:** Opens automatically when Zeus is active. Displays live stats — Active, LOS, No-LOS, Culled, Protected. Click ▲/▼ to collapse or expand.

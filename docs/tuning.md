@@ -100,8 +100,6 @@ AIC_debug = false;
 
 Units marked as protected are excluded from the culler pool entirely — they always simulate regardless of distance, LOS, or the active cap.
 
-**At placement:** Tick "Protect from culler" in the Zeus placement panel before confirming. Applies to all units placed in that batch.
-
 **On existing units:** Right-click the unit in Zeus → **Toggle Culler Protection**. Confirmation appears in system chat.
 
 **Via script** (e.g. mission init or trigger):
