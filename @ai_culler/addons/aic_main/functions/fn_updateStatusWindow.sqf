@@ -22,6 +22,6 @@ private _texts = [
 // Keep toggle button label in sync with server state
 private _toggleBtn = _display displayCtrl 9208;
 if (!isNull _toggleBtn) then {
-    _toggleBtn ctrlSetText if (AIC_cullerEnabled) then {"Disable Culler"} else {"Enable Culler"};
+    _toggleBtn ctrlSetText (if (AIC_cullerEnabled) then {"Disable Culler"} else {"Enable Culler"});
     _toggleBtn ctrlCommit 0;
 };

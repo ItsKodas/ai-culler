@@ -5,7 +5,7 @@ if (isNull _display) exitWith {};
 // Remove existing controls (idempotent)
 { ctrlDelete (_display displayCtrl _x); } forEach [9200,9201,9202,9203,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
 
-private _wx = safeZoneX + safeZoneW - 0.265;
+private _wx = safeZoneX + 0.175;
 private _y  = safeZoneY + 0.025;
 private _w  = 0.255;
 private _rH = 0.033;
@@ -36,7 +36,7 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
     private _disp     = ctrlParent _btn;
     private _collapse = !(_btn getVariable ["AIC_collapsed", false]);
     _btn setVariable ["AIC_collapsed", _collapse];
-    _btn ctrlSetText if (_collapse) then {"▼"} else {"▲"};
+    _btn ctrlSetText (if (_collapse) then {"▼"} else {"▲"});
     _btn ctrlCommit 0;
 
     if (_collapse) then {
@@ -81,14 +81,14 @@ private _idcs   = [9203, 9204, 9205, 9206, 9207];
 // Enable/Disable culler toggle button (row 5)
 private _toggleBtn = _display ctrlCreate ["RscButton", 9208];
 _toggleBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 5), _w - 0.014, _rH - 0.004];
-_toggleBtn ctrlSetText if (AIC_cullerEnabled) then {"Disable Culler"} else {"Enable Culler"};
+_toggleBtn ctrlSetText (if (AIC_cullerEnabled) then {"Disable Culler"} else {"Enable Culler"});
 _toggleBtn ctrlCommit 0;
 
 _toggleBtn ctrlAddEventHandler ["ButtonClick", {
     params ["_btn"];
     private _newState = !AIC_cullerEnabled;
     [_newState] remoteExecCall ["AIC_fnc_setCullerEnabled", 2];
-    _btn ctrlSetText if (_newState) then {"Disable Culler"} else {"Enable Culler"};
+    _btn ctrlSetText (if (_newState) then {"Disable Culler"} else {"Enable Culler"});
     _btn ctrlCommit 0;
 }];
 

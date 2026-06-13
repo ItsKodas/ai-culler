@@ -63,8 +63,6 @@ To change the defaults that load at mission start, edit `@ai_culler/addons/aic_m
 
 ## Zeus Usage
 
-**On existing units:** Right-click any living AI infantry unit in Zeus → **"Toggle Culler Protection"**. Confirmation appears in system chat.
-
 **Status window:** Opens automatically when Zeus is active. Displays live stats — Active, LOS, No-LOS, Culled, Protected. Click ▲/▼ to collapse or expand.
 
 - **Disable Culler / Enable Culler** — pauses and resumes culling entirely. All previously culled AI are re-enabled when disabled.

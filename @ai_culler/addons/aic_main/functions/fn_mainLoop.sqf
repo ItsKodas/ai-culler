@@ -44,7 +44,7 @@ while {true} do {
             private _dist = _x distance _unit;
             if (_dist < _nearestDist) then { _nearestDist = _dist; };
             if (_dist < _cullDist && !_hasLOS) then {
-                if ([_x, _unit, 0] call BIS_fnc_checkVisibility > 0.5) then {
+                if (([eyePos _x, eyePos _unit] checkVisibility [_x, _unit]) > 0.5) then {
                     _hasLOS = true;
                 };
             };
