@@ -5,8 +5,8 @@ if (isNull _display) exitWith {};
 // Remove existing controls (idempotent)
 { ctrlDelete (_display displayCtrl _x); } forEach [9200,9201,9202,9203,9204,9205,9206,9207,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9220];
 
-private _wx = safeZoneX + 0.175;
-private _y  = safeZoneY + 0.025;
+private _wx = safeZoneX + 0.225;
+private _y  = safeZoneY + 0.07;
 private _w  = 0.255;
 private _rH = 0.033;
 private _tH = 0.036;

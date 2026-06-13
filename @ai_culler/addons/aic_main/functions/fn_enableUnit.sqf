@@ -1,6 +1,7 @@
 params ["_unit"];
 
 if (_unit getVariable ["AIC_disabled", false]) then {
+    _unit enableSimulation true;
     _unit enableAI "ALL";
     _unit setVariable ["AIC_disabled", false];
 
