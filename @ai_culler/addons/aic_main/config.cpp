@@ -3,6 +3,8 @@ class CfgPatches {
         name = "AI Culler";
         author = "koda";
         url = "";
+        units[] = {};
+        weapons[] = {};
         requiredVersion = 1.98;
         requiredAddons[] = {};
         version = "1.0.0";
