@@ -12,8 +12,9 @@ while {true} do {
 
     private _playerEyePos = eyePos player;
 
-    // ADS cone: only active while right mouse is held (Zoom action)
-    private _ads = inputAction "Zoom" > 0;
+    // ADS cone: only active while right mouse is held.
+    // "Zoom" covers iron-sight/hold-breath zoom; "OpticsCursor" covers optic scopes.
+    private _ads = (inputAction "Zoom" > 0) || (inputAction "OpticsCursor" > 0);
     private _lookDir = [0,0,0];
     if (_ads) then {
         _lookDir = vectorNormalized ((positionCameraToWorld [0,0,1]) vectorDiff (positionCameraToWorld [0,0,0]));
@@ -80,7 +81,8 @@ while {true} do {
         };
         if (!isNull _dc) then {
             private _rendered = (count _candidates) - (count _newHidden);
-            _dc ctrlSetText format ["CR: %1 visible | %2 hidden", _rendered, count _newHidden];
+            private _adsStr = if (_ads) then { " [ADS]" } else { "" };
+            _dc ctrlSetText format ["CR: %1 visible | %2 hidden%3", _rendered, count _newHidden, _adsStr];
             _dc ctrlCommit 0;
         };
     } else {
