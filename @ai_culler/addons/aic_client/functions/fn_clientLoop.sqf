@@ -14,7 +14,8 @@ while {true} do {
 
     // ADS cone: when aiming down sights, units aimed at are force-rendered even if body-occluded
     private _ads     = isAimingDown player;
-    private _lookDir = if (_ads) then { eyeDirection player } else { [0,0,0] };
+    private _lookDir = [0,0,0];
+    if (_ads) then { _lookDir = eyeDirection player; };
 
     // Candidates: living AI infantry within the check radius
     private _candidates = allUnits select {
