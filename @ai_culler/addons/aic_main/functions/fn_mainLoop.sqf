@@ -114,17 +114,20 @@ while {true} do {
 
     private _culledCount    = (count _allAI) - _activeCount;
     private _overrideCount  = { (group _x) getVariable ["AIC_zeusWaypoint", false] } count _allAI;
+    private _totalAI        = (count _allAI) + _protectedCount;
+    private _serverFPS      = round diag_fps;
 
     if (AIC_debug) then {
         diag_log format [
-            "[AIC] Active: %1 / %2 | LOS: %3 | No-LOS: %4 | Out: %5 | Protected: %6 | Culled: %7 | Override: %8",
+            "[AIC] Active: %1 / %2 | LOS: %3 | No-LOS: %4 | Out: %5 | Protected: %6 | Culled: %7 | Override: %8 | Total: %9 | SrvFPS: %10",
             _activeCount, AIC_maxActiveAI,
             count _inRangeLOS, count _inRangeNoLOS,
-            count _outOfRange, _protectedCount, _culledCount, _overrideCount
+            count _outOfRange, _protectedCount, _culledCount, _overrideCount,
+            _totalAI, _serverFPS
         ];
     };
 
-    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount]
+    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount, _totalAI, _serverFPS]
         call AIC_fnc_broadcastStats;
 
     sleep AIC_checkInterval;
