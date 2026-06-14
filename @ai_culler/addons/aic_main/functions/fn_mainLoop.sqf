@@ -6,6 +6,9 @@ while {true} do {
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
         { [_x] call AIC_fnc_enableUnit; } forEach (allUnits select { _x getVariable ["AIC_disabled", false] });
+        private _totalAI   = { alive _x && _x isKindOf "Man" && !isPlayer _x } count allUnits;
+        private _serverFPS = round diag_fps;
+        [0, 0, 0, 0, 0, 0, 0, _totalAI, _serverFPS] call AIC_fnc_broadcastStats;
         sleep AIC_checkInterval;
         continue;
     };
