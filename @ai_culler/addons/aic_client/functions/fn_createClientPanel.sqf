@@ -5,7 +5,7 @@ if (isNull _display) exitWith {};
 // Remove existing controls (idempotent)
 { ctrlDelete (_display displayCtrl _x); } forEach [9300,9301,9302,9303,9304,9305,9306,9307,9308,9309,9310];
 
-private _wx  = safeZoneX + 0.647;  // right of main AIC panel (0.35 + 0.29 + 0.007 gap)
+private _wx  = safeZoneX + 0.687;  // right of main AIC panel (0.35 + 0.33 + 0.007 gap)
 private _y   = safeZoneY + 0.07;
 private _w   = 0.255;
 private _rH  = 0.033;

@@ -4,7 +4,7 @@ while {true} do {
     sleep AIC_clientInterval;
 
     if (!AIC_clientEnabled) then {
-        { hideObject [_x, false]; } forEach AIC_clientHidden;
+        { _x hideObject false; } forEach AIC_clientHidden;
         AIC_clientHidden = [];
         continue;
     };
@@ -23,7 +23,7 @@ while {true} do {
 
         if ((_unit distance player) <= AIC_clientSafeRadius) then {
             // Always visible within safe radius — prevents pop-in as units close distance
-            hideObject [_unit, false];
+            _unit hideObject false;
         } else {
             // Terrain is cheaper — check it first
             private _unitEyePos = eyePos _unit;
@@ -36,17 +36,17 @@ while {true} do {
             };
 
             if (_blocked) then {
-                hideObject [_unit, true];
+                _unit hideObject true;
                 _newHidden pushBack _unit;
             } else {
-                hideObject [_unit, false];
+                _unit hideObject false;
             };
         };
     } forEach _candidates;
 
     // Re-show units that left the candidate pool this tick (out of range, just died, etc.)
     {
-        if !(_x in _candidates) then { hideObject [_x, false]; };
+        if !(_x in _candidates) then { _x hideObject false; };
     } forEach AIC_clientHidden;
 
     AIC_clientHidden = _newHidden;
