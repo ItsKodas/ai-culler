@@ -1,2 +1,2 @@
-name = "AI Culler";
+name = "AI Culler: Optimized Warfare";
 picture = "";

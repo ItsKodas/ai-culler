@@ -1,0 +1,11 @@
+name = "AI Culler: Optimized Warfare";
+picture = "";
+logo = "";
+logoOver = "";
+author = "Koda";
+authorUrl = "";
+version = "3.1.2";
+versionStr = "3.1.2";
+versionAr[] = {3, 1, 2};
+description = "Eliminates server and client FPS spikes caused by large AI counts. Server-side simulation culler prioritises active AI by proximity and line of sight. Client-side renderer hides occluded AI models from each player's view. Designed for large milsim operations with 60+ players and high AI counts. No mission changes required.";
+dlcName = "";
