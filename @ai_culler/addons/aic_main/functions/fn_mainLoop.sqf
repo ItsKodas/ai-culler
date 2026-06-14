@@ -40,8 +40,15 @@ while {true} do {
     private _inRangeNoLOS = [];
     private _inRangeLOS   = [];
 
+    // Process in chunks of 25, yielding one engine frame between each chunk.
+    // This spreads raycasts and nearEntities calls across multiple frames instead
+    // of blocking the server thread for the full duration of the loop.
+    private _chunkCount = 0;
     {
-        private _unit     = _x;
+        private _unit = _x;
+        // Unit may have died during a yield between chunks
+        if (!alive _unit) then { continue; };
+
         private _cullDist = [_unit] call AIC_fnc_getCullDist;
 
         // Pass 1: find nearest reference point (player body or Zeus camera)
@@ -92,6 +99,9 @@ while {true} do {
                 };
             };
         };
+
+        _chunkCount = _chunkCount + 1;
+        if ((_chunkCount % 25) == 0) then { sleep 0; };
     } forEach _allAI;
 
     _outOfRange   = [_outOfRange,   [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
