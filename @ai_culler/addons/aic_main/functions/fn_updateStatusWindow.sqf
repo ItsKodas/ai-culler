@@ -6,7 +6,7 @@ if (isNull _display) exitWith {};
 private _clientFPS = round diag_fps;
 
 private _texts = [
-    format ["Active: %1 / %2", _activeCount, AIC_maxActiveAI],
+    format ["Active: %1/%2", _activeCount, AIC_maxActiveAI],
     format ["LOS: %1",         _losCount],
     format ["No-LOS: %1",      _noLosCount],
     format ["Culled: %1",      _culledCount],
