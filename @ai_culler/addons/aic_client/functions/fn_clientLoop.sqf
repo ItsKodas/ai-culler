@@ -67,14 +67,19 @@ while {true} do {
         private _dc = findDisplay 46 displayCtrl 9320;
         if (isNull _dc) then {
             _dc = (findDisplay 46) ctrlCreate ["RscText", 9320];
-            _dc ctrlSetPosition [safeZoneX + 0.005, safeZoneY + safeZoneH - 0.038, 0.22, 0.033];
-            _dc ctrlSetTextColor [1, 1, 0.3, 1];
-            _dc ctrlSetBackgroundColor [0, 0, 0, 0.55];
+            if (!isNull _dc) then {
+                _dc ctrlSetPosition [safeZoneX + 0.005, safeZoneY + safeZoneH - 0.05, 0.22, 0.033];
+                _dc ctrlSetTextColor [1, 1, 0.3, 1];
+                _dc ctrlSetBackgroundColor [0, 0, 0, 0.55];
+                _dc ctrlShow true;
+                _dc ctrlCommit 0;
+            };
+        };
+        if (!isNull _dc) then {
+            private _rendered = (count _candidates) - (count _newHidden);
+            _dc ctrlSetText format ["CR: %1 visible | %2 hidden", _rendered, count _newHidden];
             _dc ctrlCommit 0;
         };
-        private _rendered = (count _candidates) - (count _newHidden);
-        _dc ctrlSetText format ["CR: %1 visible | %2 hidden", _rendered, count _newHidden];
-        _dc ctrlCommit 0;
     } else {
         private _dc = findDisplay 46 displayCtrl 9320; if (!isNull _dc) then { ctrlDelete _dc; };
     };
