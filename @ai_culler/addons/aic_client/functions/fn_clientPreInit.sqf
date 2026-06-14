@@ -4,7 +4,6 @@ AIC_clientSafeRadius  = 75;
 AIC_clientInterval    = 0.3;
 AIC_clientHidden      = [];
 AIC_clientDebug       = false;
-AIC_clientDebugCtrl   = controlNull;
 
 if (!hasInterface) exitWith {};
 
