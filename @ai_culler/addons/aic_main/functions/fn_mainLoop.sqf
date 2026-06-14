@@ -40,9 +40,13 @@ while {true} do {
     private _inRangeNoLOS = [];
     private _inRangeLOS   = [];
 
-    // Process in chunks of 25, yielding one engine frame between each chunk.
-    // This spreads raycasts and nearEntities calls across multiple frames instead
-    // of blocking the server thread for the full duration of the loop.
+    // Process in chunks of 25, yielding between chunks to spread raycasts and
+    // nearEntities calls across time rather than blocking the server thread.
+    // Target: consume ~40% of the check interval (2s at default 5s).
+    // Yield time shrinks as AI count grows so total spread stays consistent.
+    private _chunkSize  = 25;
+    private _numChunks  = (ceil ((count _allAI) / _chunkSize)) max 1;
+    private _yieldTime  = (AIC_checkInterval * 0.4) / _numChunks;
     private _chunkCount = 0;
     {
         private _unit = _x;
@@ -101,7 +105,7 @@ while {true} do {
         };
 
         _chunkCount = _chunkCount + 1;
-        if ((_chunkCount % 25) == 0) then { sleep 0; };
+        if ((_chunkCount % _chunkSize) == 0 && _chunkCount < count _allAI) then { sleep _yieldTime; };
     } forEach _allAI;
 
     _outOfRange   = [_outOfRange,   [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
