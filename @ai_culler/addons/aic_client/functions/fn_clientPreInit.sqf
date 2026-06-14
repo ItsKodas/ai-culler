@@ -1,8 +1,10 @@
-AIC_clientEnabled    = true;
-AIC_clientRadius     = 1500;  // set this to match your server's object view distance
-AIC_clientSafeRadius = 75;
-AIC_clientInterval   = 0.3;
-AIC_clientHidden     = [];
+AIC_clientEnabled     = true;
+AIC_clientRadius      = 1500;  // set this to match your server's object view distance
+AIC_clientSafeRadius  = 75;
+AIC_clientInterval    = 0.3;
+AIC_clientHidden      = [];
+AIC_clientDebug       = false;
+AIC_clientDebugCtrl   = controlNull;
 
 if (!hasInterface) exitWith {};
 

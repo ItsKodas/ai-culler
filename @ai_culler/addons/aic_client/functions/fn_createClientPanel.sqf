@@ -3,7 +3,7 @@ params ["_display"];
 if (isNull _display) exitWith {};
 
 // Remove existing controls (idempotent)
-{ ctrlDelete (_display displayCtrl _x); } forEach [9300,9301,9302,9303,9304,9305,9306,9307,9308,9309,9310];
+{ ctrlDelete (_display displayCtrl _x); } forEach [9300,9301,9302,9303,9304,9305,9306,9307,9308,9309,9310,9311];
 
 private _wx  = safeZoneX + 0.687;  // right of main AIC panel (0.35 + 0.33 + 0.007 gap)
 private _y   = safeZoneY + 0.07;
@@ -14,9 +14,9 @@ private _lW  = 0.135;
 private _eX  = _wx + 0.007 + _lW + 0.004;
 private _eW  = _w - 0.007 - _lW - 0.004 - 0.007;
 
-// Background — 5 rows
+// Background — 6 rows
 private _bg = _display ctrlCreate ["RscText", 9300];
-_bg ctrlSetPosition [_wx, _y, _w, _tH + (_rH * 5) + 0.012];
+_bg ctrlSetPosition [_wx, _y, _w, _tH + (_rH * 6) + 0.012];
 _bg ctrlSetBackgroundColor [0, 0, 0, 0.78];
 _bg ctrlCommit 0;
 
@@ -45,7 +45,7 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
     _btn ctrlCommit 0;
 
     { (_disp displayCtrl _x) ctrlShow (!_collapse); (_disp displayCtrl _x) ctrlCommit 0; }
-        forEach [9303,9304,9305,9306,9307,9308,9309,9310];
+        forEach [9303,9304,9305,9306,9307,9308,9309,9310,9311];
 
     private _bg2  = _disp displayCtrl 9300;
     private _pos  = ctrlPosition _bg2;
@@ -53,7 +53,7 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
     private _rH2  = 0.033;
     _bg2 ctrlSetPosition [
         _pos select 0, _pos select 1, _pos select 2,
-        if (_collapse) then {_tH2 + 0.004} else {_tH2 + (_rH2 * 5) + 0.012}
+        if (_collapse) then {_tH2 + 0.004} else {_tH2 + (_rH2 * 6) + 0.012}
     ];
     _bg2 ctrlCommit 0;
 }];
@@ -95,9 +95,24 @@ private _settingsDefs = [
     _edtCtrl ctrlCommit 0;
 } forEach _settingsDefs;
 
-// Row 4: Apply — sets globals and publicVariables to all clients
+// Row 4: debug HUD toggle
+private _debugBtn = _display ctrlCreate ["RscButton", 9311];
+_debugBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 4), _w - 0.014, _rH - 0.004];
+_debugBtn ctrlSetText (if (AIC_clientDebug) then {"Debug HUD: ON"} else {"Debug HUD: OFF"});
+_debugBtn ctrlCommit 0;
+_debugBtn setVariable ["AIC_debugOn", AIC_clientDebug];
+
+_debugBtn ctrlAddEventHandler ["ButtonClick", {
+    params ["_btn"];
+    private _newVal = !(_btn getVariable ["AIC_debugOn", false]);
+    _btn setVariable ["AIC_debugOn", _newVal];
+    _btn ctrlSetText (if (_newVal) then {"Debug HUD: ON"} else {"Debug HUD: OFF"});
+    _btn ctrlCommit 0;
+}];
+
+// Row 5: Apply — sets globals and publicVariables to all clients
 private _applyBtn = _display ctrlCreate ["RscButton", 9310];
-_applyBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 4), _w - 0.014, _rH - 0.004];
+_applyBtn ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 5), _w - 0.014, _rH - 0.004];
 _applyBtn ctrlSetText "Apply";
 _applyBtn ctrlCommit 0;
 
@@ -109,9 +124,11 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     AIC_clientRadius     = parseNumber ctrlText (_disp displayCtrl 9305);
     AIC_clientSafeRadius = parseNumber ctrlText (_disp displayCtrl 9307);
     AIC_clientInterval   = parseNumber ctrlText (_disp displayCtrl 9309);
+    AIC_clientDebug      = (_disp displayCtrl 9311) getVariable ["AIC_debugOn", false];
 
     publicVariable "AIC_clientEnabled";
     publicVariable "AIC_clientRadius";
     publicVariable "AIC_clientSafeRadius";
     publicVariable "AIC_clientInterval";
+    publicVariable "AIC_clientDebug";
 }];

@@ -6,6 +6,7 @@ while {true} do {
     if (!AIC_clientEnabled) then {
         { _x hideObject false; } forEach AIC_clientHidden;
         AIC_clientHidden = [];
+        if (!isNull AIC_clientDebugCtrl) then { ctrlDelete AIC_clientDebugCtrl; AIC_clientDebugCtrl = controlNull; };
         continue;
     };
 
@@ -50,4 +51,20 @@ while {true} do {
     } forEach AIC_clientHidden;
 
     AIC_clientHidden = _newHidden;
+
+    // Debug HUD — small overlay on the normal player screen
+    if (AIC_clientDebug) then {
+        if (isNull AIC_clientDebugCtrl) then {
+            AIC_clientDebugCtrl = (findDisplay 46) ctrlCreate ["RscText", -1];
+            AIC_clientDebugCtrl ctrlSetPosition [safeZoneX + 0.005, safeZoneY + safeZoneH - 0.038, 0.22, 0.033];
+            AIC_clientDebugCtrl ctrlSetTextColor [1, 1, 0.3, 1];
+            AIC_clientDebugCtrl ctrlSetBackgroundColor [0, 0, 0, 0.55];
+            AIC_clientDebugCtrl ctrlCommit 0;
+        };
+        private _rendered = (count _candidates) - (count _newHidden);
+        AIC_clientDebugCtrl ctrlSetText format ["CR: %1 visible | %2 hidden", _rendered, count _newHidden];
+        AIC_clientDebugCtrl ctrlCommit 0;
+    } else {
+        if (!isNull AIC_clientDebugCtrl) then { ctrlDelete AIC_clientDebugCtrl; AIC_clientDebugCtrl = controlNull; };
+    };
 };
