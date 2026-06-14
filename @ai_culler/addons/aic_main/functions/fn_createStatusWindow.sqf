@@ -7,10 +7,10 @@ if (isNull _display) exitWith {};
 
 private _wx    = safeZoneX + 0.35;
 private _y     = safeZoneY + 0.07;
-private _w     = 0.33;
+private _w     = 0.38;
 private _rH    = 0.033;
 private _tH    = 0.036;
-private _colW  = 0.145;
+private _colW  = 0.175;
 private _rColX = _wx + 0.007 + _colW + 0.005;
 private _rColW = _w - 0.014 - _colW - 0.005;
 
