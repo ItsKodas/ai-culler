@@ -14,7 +14,7 @@ class CfgPatches {
 };
 
 class CfgFunctions {
-    class AIC {
+    class AIC_Client {
         tag = "AIC";
         class Client {
             file = "aic_client\functions";
