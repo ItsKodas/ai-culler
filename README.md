@@ -77,10 +77,24 @@ Edit `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and rebuild the PBO:
 | `AIC_distOpfor` | 2000m | Cull distance for OPFOR (east) |
 | `AIC_distIndependent` | 1000m | Cull distance for Independent |
 | `AIC_distCivilian` | 500m | Cull distance for Civilians |
-| `AIC_checkInterval` | 5s | How often the culler runs |
+| `AIC_checkInterval` | 5s | How often the culler runs — also controls load spreading (see below) |
 | `AIC_minActiveRadius` | 200m | Units within this radius are always active (no LOS check) |
 | `AIC_combatRadius` | 400m | Radius used to detect AI vs AI combat engagement |
 | `AIC_debug` | true | RPT logging — set to `false` for live ops |
+
+#### Performance tuning with `AIC_checkInterval`
+
+The classification loop (raycasts + proximity checks for every AI unit) runs in chunks of 25 units, yielding between each chunk so the server thread is never blocked for the full duration. The total spread targets **40% of `AIC_checkInterval`** — at the 5s default, the work is distributed across ~2 seconds with the remaining 3 seconds idle.
+
+If the server is under heavy load, increasing the interval is the primary tuning lever:
+
+| `AIC_checkInterval` | Work spread | Idle time | Activation latency |
+|---|---|---|---|
+| 5s (default) | ~2s | ~3s | up to 5s |
+| 8s | ~3.2s | ~4.8s | up to 8s |
+| 10s | ~4s | ~6s | up to 10s |
+
+Activation latency (how long before a newly relevant unit gets enabled) is the only gameplay trade-off. For most milsim ops, 8–10s is imperceptible since engagements develop over minutes. `AIC_checkInterval` is adjustable live from the Zeus settings panel — no restart required.
 
 ---
 
@@ -245,6 +259,11 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.1.2
+- Classification loop now yields between every 25-unit chunk instead of running synchronously, eliminating per-tick FPS spikes on the server
+- Yield time is computed dynamically: total spread targets ~40% of `AIC_checkInterval` (~2s at default 5s), scaling automatically as AI count and interval change
+- `AIC_checkInterval` is now the primary performance lever — increasing it gives the server more breathing room without any other config changes; adjustable live from the Zeus settings panel
 
 ### v3.1.1
 - Added ADS cone override — units within ~30° of the player's aim direction are force-rendered while holding RMB (no optic) or while looking through a weapon optic, preventing occluded units from vanishing during peek-around-corner engagements
