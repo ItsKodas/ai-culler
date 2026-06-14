@@ -12,9 +12,9 @@ while {true} do {
 
     private _playerEyePos = eyePos player;
 
-    // ADS cone: only active while right mouse is held.
-    // zoomTemp = Hold RMB precision aim (no optic); opticsTemp = Hold RMB optic view.
-    private _ads = (inputAction "zoomTemp" > 0) || (inputAction "opticsTemp" > 0);
+    // ADS cone: active while holding RMB (no optic) or while optic view is toggled on.
+    // zoomTemp = Hold RMB precision aim (no optic). cameraView "GUNNER" = player looking through a weapon optic (toggle or hold).
+    private _ads = (inputAction "zoomTemp" > 0) || (inputAction "opticsTemp" > 0) || (cameraView == "GUNNER");
     private _lookDir = [0,0,0];
     if (_ads) then {
         _lookDir = vectorNormalized ((positionCameraToWorld [0,0,1]) vectorDiff (positionCameraToWorld [0,0,0]));
