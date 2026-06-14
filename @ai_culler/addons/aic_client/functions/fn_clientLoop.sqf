@@ -10,6 +10,13 @@ while {true} do {
         continue;
     };
 
+    // Zeus camera: player sees the battlefield from above — never cull anything
+    if (!isNull (findDisplay 312)) then {
+        { _x hideObject false; } forEach AIC_clientHidden;
+        AIC_clientHidden = [];
+        continue;
+    };
+
     private _playerEyePos = eyePos player;
 
     // ADS cone: active while holding RMB (no optic) or while optic view is toggled on.
