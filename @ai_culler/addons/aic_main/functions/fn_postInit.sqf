@@ -2,12 +2,16 @@ if (isServer) then {
     if (AIC_debug) then { diag_log "[AIC] Server — starting culler loop"; };
     [] spawn AIC_fnc_mainLoop;
 
-    // Sample server FPS every second, independent of the culler tick, so the
+    // Seed with current FPS before mission load so the initial display is close
+    // to the server's configured cap rather than an arbitrary placeholder.
+    AIC_serverFPS = round diag_fps;
+
+    // Keep updating every second, independent of the culler tick, so the
     // reading is not biased by the culler's own processing load.
     [] spawn {
         while {true} do {
-            AIC_serverFPS = round diag_fps;
             sleep 1;
+            AIC_serverFPS = round diag_fps;
         };
     };
 
