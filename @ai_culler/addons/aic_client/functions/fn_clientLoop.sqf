@@ -12,6 +12,10 @@ while {true} do {
 
     private _playerEyePos = eyePos player;
 
+    // ADS cone: when aiming down sights, units aimed at are force-rendered even if body-occluded
+    private _ads     = isAimingDown player;
+    private _lookDir = if (_ads) then { eyeDirection player } else { [0,0,0] };
+
     // Candidates: living AI infantry within the check radius
     private _candidates = allUnits select {
         !isPlayer _x && alive _x && (_x isKindOf "Man") && (_x distance player) < AIC_clientRadius
@@ -34,6 +38,12 @@ while {true} do {
             if (!_blocked) then {
                 private _hits = lineIntersectsObjs [_playerEyePos, _unitEyePos, player, _unit];
                 _blocked = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) != -1;
+            };
+
+            // ADS cone override: unit is within ~30° of aim direction — render regardless of occlusion
+            if (_blocked && _ads) then {
+                private _toUnit = vectorNormalized (_unitEyePos vectorDiff _playerEyePos);
+                if ((_lookDir vectorDotProduct _toUnit) >= 0.866) then { _blocked = false; };
             };
 
             if (_blocked) then {

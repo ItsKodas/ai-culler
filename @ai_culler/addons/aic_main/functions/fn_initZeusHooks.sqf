@@ -38,6 +38,20 @@ if (!hasInterface) exitWith {};
             false
         }];
 
+        // 1-second FPS refresh — updates Srv/Clt FPS rows without waiting for the server tick
+        [] spawn {
+            while { !isNull (findDisplay 312) } do {
+                sleep 1;
+                private _disp = findDisplay 312;
+                if (!isNull _disp) then {
+                    private _srvCtrl = _disp displayCtrl 9230;
+                    private _cltCtrl = _disp displayCtrl 9231;
+                    if (!isNull _srvCtrl) then { _srvCtrl ctrlSetText format ["Srv FPS: %1", AIC_serverFPS]; _srvCtrl ctrlCommit 0; };
+                    if (!isNull _cltCtrl) then { _cltCtrl ctrlSetText format ["Clt FPS: %1", round diag_fps]; _cltCtrl ctrlCommit 0; };
+                };
+            };
+        };
+
         // Refresh name prefixes for units already flagged
         { if (alive _x && _x isKindOf "Man" && !isPlayer _x) then { [_x] call AIC_fnc_updateUnitLabel; }; } forEach allUnits;
 

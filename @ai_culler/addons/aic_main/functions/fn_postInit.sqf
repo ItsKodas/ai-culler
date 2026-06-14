@@ -12,6 +12,7 @@ if (isServer) then {
         while {true} do {
             sleep 1;
             AIC_serverFPS = round diag_fps;
+            publicVariable "AIC_serverFPS";
         };
     };
 
