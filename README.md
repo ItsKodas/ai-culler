@@ -164,6 +164,8 @@ The check is intentionally permissive:
 - **Trees and bushes are ignored** — a unit behind a tree is still hidden, but the tree itself does not count as occlusion
 - **Terrain is checked first** (cheap raycast), then solid objects (building walls, vehicles, rocks)
 - **Safe radius** — units within `AIC_clientSafeRadius` are always rendered regardless of LOS, preventing pop-in as AI close distance
+- **ADS cone** — when the player is holding RMB (precision aim) or looking through a weapon optic, AI within ~30° of the camera's aim direction are force-rendered even if occluded. This prevents units from vanishing as you peek around corners to engage them
+- **Zeus camera** — while the Zeus interface is open, no units are hidden. All previously hidden units are restored immediately on entry so the Zeus player sees the full battlefield
 
 `hideObject` is client-local — it affects only the machine running the check and does not change AI state or hitboxes for any other player.
 
@@ -178,10 +180,10 @@ This is architecturally different from mods like A3PE (Arma 3 Performance Extens
 When **Debug HUD** is enabled from the Zeus Client Renderer panel, a small yellow overlay appears in the bottom-left corner of every client's screen:
 
 ```
-CR: 47 visible | 112 hidden
+CR: 47 visible | 112 hidden [ADS]
 ```
 
-This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
+`[ADS]` appears when the cone override is active (RMB held or optic view open). This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
 
 ### Default settings
 
@@ -243,6 +245,12 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.1.1
+- Added ADS cone override — units within ~30° of the player's aim direction are force-rendered while holding RMB (no optic) or while looking through a weapon optic, preventing occluded units from vanishing during peek-around-corner engagements
+- Added Zeus camera bypass — while the Zeus interface is open, all previously hidden units are immediately restored and culling is suspended so the Zeus player sees the full battlefield
+- Debug HUD now displays `[ADS]` when the cone override is active
+- Fixed ADS detection using invalid `inputAction` names (`"Zoom"`, `"OpticsCursor"`) that always returned 0 — replaced with `"zoomTemp"` (hold RMB precision aim) and `cameraView == "GUNNER"` (weapon optic active)
 
 ### v3.1.0
 - Added `aic_client` addon — client-side LOS model hider that hides occluded AI infantry via `hideObject`, reducing client FPS impact from large AI forces
