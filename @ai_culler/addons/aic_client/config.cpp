@@ -18,8 +18,10 @@ class CfgFunctions {
         tag = "AIC";
         class Client {
             file = "aic_client\functions";
-            class clientPreInit { preInit = 1; };
-            class clientLoop {};
+            class clientPreInit    { preInit = 1; };
+            class clientLoop       {};
+            class clientZeusHooks  {};
+            class createClientPanel {};
         };
     };
 };

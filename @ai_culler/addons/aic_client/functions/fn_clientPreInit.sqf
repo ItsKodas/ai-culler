@@ -11,3 +11,5 @@ if (!hasInterface) exitWith {};
     sleep 5;
     [] call AIC_fnc_clientLoop;
 };
+
+[] call AIC_fnc_clientZeusHooks;
