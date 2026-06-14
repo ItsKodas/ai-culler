@@ -12,10 +12,8 @@ while {true} do {
 
     private _playerEyePos = eyePos player;
 
-    // ADS cone: when aiming down sights, units aimed at are force-rendered even if body-occluded
-    private _ads     = isAimingDown player;
-    private _lookDir = [0,0,0];
-    if (_ads) then { _lookDir = eyeDirection player; };
+    // Look-direction cone: camera direction via positionCameraToWorld (available in all ArmA 3 versions)
+    private _lookDir = vectorNormalized ((positionCameraToWorld [0,0,1]) vectorDiff (positionCameraToWorld [0,0,0]));
 
     // Candidates: living AI infantry within the check radius
     private _candidates = allUnits select {
@@ -41,8 +39,8 @@ while {true} do {
                 _blocked = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) != -1;
             };
 
-            // ADS cone override: unit is within ~30° of aim direction — render regardless of occlusion
-            if (_blocked && _ads) then {
+            // Look-cone override: unit is within ~30° of camera direction — render regardless of occlusion
+            if (_blocked) then {
                 private _toUnit = vectorNormalized (_unitEyePos vectorDiff _playerEyePos);
                 if ((_lookDir vectorDotProduct _toUnit) >= 0.866) then { _blocked = false; };
             };
