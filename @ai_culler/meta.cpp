@@ -1,2 +1,2 @@
 name = "AI Culler: Optimized Warfare";
-picture = "";
+picture = "\@ai_culler\data\mod_icon.paa";
