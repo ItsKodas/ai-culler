@@ -7,7 +7,7 @@ while {true} do {
         // Re-enable any units that were disabled before culler was turned off
         { [_x] call AIC_fnc_enableUnit; } forEach (allUnits select { _x getVariable ["AIC_disabled", false] });
         private _totalAI   = { alive _x && _x isKindOf "Man" && !isPlayer _x } count allUnits;
-        private _serverFPS = round diag_fps;
+        private _serverFPS = AIC_serverFPS;
         [0, 0, 0, 0, 0, 0, 0, _totalAI, _serverFPS] call AIC_fnc_broadcastStats;
         sleep AIC_checkInterval;
         continue;
@@ -118,7 +118,7 @@ while {true} do {
     private _culledCount    = (count _allAI) - _activeCount;
     private _overrideCount  = { (group _x) getVariable ["AIC_zeusWaypoint", false] } count _allAI;
     private _totalAI        = (count _allAI) + _protectedCount;
-    private _serverFPS      = round diag_fps;
+    private _serverFPS      = AIC_serverFPS;
 
     if (AIC_debug) then {
         diag_log format [

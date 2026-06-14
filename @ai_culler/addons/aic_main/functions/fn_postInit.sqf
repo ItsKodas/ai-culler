@@ -2,6 +2,15 @@ if (isServer) then {
     if (AIC_debug) then { diag_log "[AIC] Server — starting culler loop"; };
     [] spawn AIC_fnc_mainLoop;
 
+    // Sample server FPS every second, independent of the culler tick, so the
+    // reading is not biased by the culler's own processing load.
+    [] spawn {
+        while {true} do {
+            AIC_serverFPS = round diag_fps;
+            sleep 1;
+        };
+    };
+
     // Detect Zeus-assigned waypoints by comparing live count against a per-group baseline.
     // addMissionEventHandler ["WaypointAdded"] is not valid in Arma 3; polling is the only option.
     // Editor-placed waypoints are captured in the baseline, so they never trigger Override.

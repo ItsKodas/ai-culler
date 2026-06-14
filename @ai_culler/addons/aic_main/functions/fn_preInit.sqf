@@ -8,6 +8,7 @@ AIC_minActiveRadius  = 200;
 AIC_combatRadius     = 400;
 AIC_debug            = true;
 AIC_cullerEnabled    = true;
+AIC_serverFPS        = 50;
 
 if (AIC_debug) then {
     diag_log "[AIC] Settings initialised";
