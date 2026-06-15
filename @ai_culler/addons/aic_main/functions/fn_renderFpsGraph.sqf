@@ -6,7 +6,8 @@ if (isNull _display) exitWith {};
 private _graphCtrl = _display displayCtrl 9253;
 if (isNull _graphCtrl || { !ctrlShown _graphCtrl }) exitWith {};
 
-private _history = if (isNil "AIC_fpsHistory") then { [] } else { AIC_fpsHistory };
+if (isNil "AIC_fpsHistory") then { AIC_fpsHistory = [] };
+private _history = AIC_fpsHistory;
 private _n = count _history;
 
 if (_n == 0) exitWith {
@@ -26,13 +27,15 @@ if (_n <= _maxCols) then {
     };
 };
 
-private _maxFPS     = 60;
-private _blockChars = ["▁","▂","▃","▄","▅","▆","▇","█"];
-private _text       = "";
+// ASCII height chars ordered low -> high (avoids multi-byte UTF-8 which
+// can confuse Arma's SQF preprocessor when read as Windows-1252).
+private _maxFPS    = 60;
+private _heightChars = ["_", ".", "-", "~", "+", "s", "I", "#"];
+private _text      = "";
 {
-    private _fps  = _x min _maxFPS max 0;
-    private _idx  = floor (_fps / _maxFPS * 7) min 7;
-    private _char = _blockChars select _idx;
+    private _fps   = _x min _maxFPS max 0;
+    private _idx   = floor (_fps / _maxFPS * 7) min 7;
+    private _char  = _heightChars select _idx;
     private _color = if (_fps >= 40) then { "#44ff88" } else {
                      if (_fps >= 25) then { "#ffcc22" } else { "#ff4444" } };
     _text = _text + format ["<t size='2' color='%1'>%2</t>", _color, _char];

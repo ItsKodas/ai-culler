@@ -1,6 +1,6 @@
 if (!hasInterface) exitWith {};
 
-// Ring buffer for server FPS history — registered once; persists across Zeus sessions
+// Ring buffer for server FPS history - registered once; persists across Zeus sessions
 // so the graph retains data even when Zeus is closed between ops.
 if (isNil "AIC_fpsHistory") then {
     AIC_fpsHistory = [];

@@ -26,7 +26,7 @@ _bg ctrlCommit 0;
 // Title bar
 private _titleCtrl = _display ctrlCreate ["RscText", 9252];
 _titleCtrl ctrlSetPosition [_gx + 0.005, _gy + 0.003, _gw - 0.01, _tH - 0.006];
-_titleCtrl ctrlSetText "Server FPS — Last 5 min";
+_titleCtrl ctrlSetText "Server FPS - Last 5 min";
 _titleCtrl ctrlSetBackgroundColor [0.12, 0.12, 0.12, 1];
 _titleCtrl ctrlShow false;
 _titleCtrl ctrlCommit 0;
