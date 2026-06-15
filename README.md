@@ -1,6 +1,7 @@
 # AI Culler — Arma 3 Performance Mod
 
 A two-part mod that tackles Arma 3 performance from both ends: a server-side AI simulation culler and a client-side model renderer. Designed for large milsim ops with 60+ players and high AI counts.
+https://steamcommunity.com/sharedfiles/filedetails/?id=3744994173
 
 ---
 
