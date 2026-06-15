@@ -120,6 +120,7 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     params ["_btn"];
     private _disp = ctrlParent _btn;
 
+    private _oldEnabled  = AIC_clientEnabled;
     AIC_clientEnabled    = (_disp displayCtrl 9303) getVariable ["AIC_clientOn", true];
     AIC_clientRadius     = parseNumber ctrlText (_disp displayCtrl 9305);
     AIC_clientSafeRadius = parseNumber ctrlText (_disp displayCtrl 9307);
@@ -131,4 +132,9 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     publicVariable "AIC_clientSafeRadius";
     publicVariable "AIC_clientInterval";
     publicVariable "AIC_clientDebug";
+
+    if (_oldEnabled != AIC_clientEnabled) then {
+        private _msg = format ["Client Renderer %1 by %2", if (AIC_clientEnabled) then {"Enabled"} else {"Disabled"}, name player];
+        ["AIC_StateNotification", [_msg]] remoteExec ["BIS_fnc_showNotification", 0];
+    };
 }];

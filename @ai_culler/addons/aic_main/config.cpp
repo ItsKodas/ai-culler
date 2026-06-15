@@ -46,3 +46,17 @@ class CfgCuratorContextActions {
         statement = "[_this select 2] remoteExec ['AIC_fnc_toggleProtection', 2];";
     };
 };
+
+class CfgNotifications {
+    class AIC_StateNotification {
+        title = "AI Culler";
+        iconPicture = "\A3\ui_f\data\map\mapcontrol\taskIcon_ca.paa";
+        iconText = "";
+        description = "%1";
+        color[] = {1, 0.65, 0, 1};
+        colorIconPicture[] = {1, 0.65, 0, 1};
+        duration = 6;
+        priority = 5;
+        difficulty[] = {};
+    };
+};

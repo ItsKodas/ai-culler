@@ -104,6 +104,10 @@ _toggleBtn ctrlAddEventHandler ["ButtonClick", {
     params ["_btn"];
     private _newState = !AIC_cullerEnabled;
     [_newState] remoteExecCall ["AIC_fnc_setCullerEnabled", 2];
+
+    private _msg = format ["AI Culler %1 by %2", if (_newState) then {"Enabled"} else {"Disabled"}, name player];
+    ["AIC_StateNotification", [_msg]] remoteExec ["BIS_fnc_showNotification", 0];
+
     _btn ctrlSetText (if (_newState) then {"Disable Culler"} else {"Enable Culler"});
     _btn ctrlCommit 0;
 }];
