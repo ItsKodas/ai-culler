@@ -306,6 +306,11 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 
 ## Changelog
 
+### v3.3.1
+- Fixed: `publicVariableClient` was passing the variable's value (a Number) instead of its name as a String — server FPS was never reaching Zeus clients
+- Fixed: proximity priority for no-LOS AI under the active cap restored — v3.3.0 removed the ascending-distance sort on the no-LOS pool, causing distant units to claim cap slots ahead of closer ones
+- Client renderer defaults tuned for 100–200 AI in radius: `AIC_clientSweepTicks` 4→3, `AIC_clientBudgetMax` 40→60 — sweeps 200 AI in ~0.8s and 100 AI in ~0.6s at the default 0.2s cadence
+
 ### v3.3.0
 - LOS check now evaluated against **all** connected players — a unit is kept active if any player has line of sight, not just the nearest. Previously a unit could be incorrectly culled while visible to a second player standing elsewhere
 - `CAManBase` replaces `Man` in all unit filters — ensures full coverage of modded infantry that inherit from `CAManBase` but not `Man`
