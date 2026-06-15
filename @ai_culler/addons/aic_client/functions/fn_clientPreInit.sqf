@@ -1,8 +1,18 @@
 AIC_clientEnabled    = true;
 AIC_clientSafeRadius = 75;
-AIC_clientInterval   = 0.3;
-AIC_clientHidden     = [];
 AIC_clientDebug      = false;
+AIC_clientHidden     = [];
+
+// --- Adaptive cadence (FPS -> interval ramp) ---
+AIC_clientIntervalMin = 0.2;   // fastest cadence at/above FpsTarget
+AIC_clientIntervalMax = 1.0;   // slowest cadence at/below FpsFloor
+AIC_clientFpsFloor    = 15;    // at/below: widest interval + budget throttle
+AIC_clientFpsTarget   = 45;    // at/above: tightest interval
+
+// --- Pool-size budget (target ~50-100 AI high end) ---
+AIC_clientSweepTicks = 4;      // clear any sweep in ~this many ticks (primary knob)
+AIC_clientBudgetMin  = 10;     // slice floor when FPS is collapsing
+AIC_clientBudgetMax  = 40;     // snug spike-guard above the 100-AI target
 
 if (!hasInterface) exitWith {};
 
@@ -10,22 +20,30 @@ if (!hasInterface) exitWith {};
     waitUntil { !isNull player };
     sleep 5;
 
-    if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {
-        private _readVD = {
+    private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");
+
+    private _fnc_readRadius = {
+        if (_hasAce) then {
             private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
             if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-            _vd
+            // guard against nil (key missing from HashMap) or nonsense values
+            if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
+            AIC_clientRadius = _vd;
+        } else {
+            AIC_clientRadius = 2000;
         };
-        AIC_clientRadius = call _readVD;
-        [] call AIC_fnc_clientLoop;
-        // Keep culling radius in sync if the player changes ACE view distance mid-mission
+    };
+
+    call _fnc_readRadius;
+    [] call AIC_fnc_clientLoop;
+
+    // Slow poll: track mid-mission ACE VD changes without touching the hot path
+    if (_hasAce) then {
         while {true} do {
-            sleep 5;
-            AIC_clientRadius = call _readVD;
+            uiSleep 30;
+            call _fnc_readRadius;
         };
-    } else {
-        AIC_clientRadius = 2000;
-        [] call AIC_fnc_clientLoop;
     };
 };
+
 [] call AIC_fnc_clientZeusHooks;

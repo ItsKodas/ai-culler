@@ -1,18 +1,36 @@
-// AIC_fnc_clientLoop — registers the per-frame culling handler
+// AIC_fnc_clientLoop — registers the adaptive per-frame culling handler
+// Design target: ~50-100 AI in radius at the high end.
 if (!hasInterface) exitWith {};
 if (!isNil "AIC_clientPFH") exitWith {};            // already running, don't double-register
 
-if (isNil "AIC_clientBudget") then { AIC_clientBudget = 25 };
+AIC_clientBudget      = AIC_clientBudgetMin;        // current computed slice size (HUD only)
+AIC_clientInterval    = AIC_clientIntervalMin;      // current computed cadence (HUD only)
+AIC_clientFpsAvg      = diag_fps max AIC_clientFpsTarget;  // seed at target so first tick isn't artificially delayed
 AIC_clientHidden      = [];   // committed hidden set (persists across ticks)
 AIC_clientQueue       = [];   // current sweep's work list (far candidates, snapshot at sweep start)
 AIC_clientCursor      = 0;    // index into the queue
-AIC_clientSweepHidden = [];   // hidden set being built up during the current sweep
+AIC_clientSweepHidden = [];   // hidden set being built up during the current (in-progress) sweep
 
 AIC_clientPFH = [{
-    // --- Disabled: reveal everything, idle cheaply, keep the handler alive ---
+    params ["_args"];
+    _args params ["_lastRun"];
+
+    // --- Smoothed FPS (~10-frame EMA) drives cadence; floor-guards the budget ---
+    AIC_clientFpsAvg = AIC_clientFpsAvg + 0.1 * (diag_fps - AIC_clientFpsAvg);
+
+    // Cadence: low FPS backs off, high FPS stays responsive
+    AIC_clientInterval = linearConversion [
+        AIC_clientFpsFloor, AIC_clientFpsTarget, AIC_clientFpsAvg,
+        AIC_clientIntervalMax, AIC_clientIntervalMin, true
+    ];
+
+    // Time gate — diag_tickTime is real seconds, immune to pause / time-accel
+    if (diag_tickTime - _lastRun < AIC_clientInterval) exitWith {};
+    _args set [0, diag_tickTime];
+
+    // --- Disabled: reveal everything (both sets), idle cheaply, keep the handler alive ---
     if (!AIC_clientEnabled) exitWith {
-        { if (!isNull _x) then { _x hideObject false } } forEach AIC_clientHidden;
-        { if (!isNull _x) then { _x hideObject false } } forEach AIC_clientSweepHidden;
+        { if (!isNull _x) then { _x hideObject false } } forEach (AIC_clientHidden + AIC_clientSweepHidden);
         AIC_clientHidden = []; AIC_clientQueue = []; AIC_clientCursor = 0; AIC_clientSweepHidden = [];
         private _dc = findDisplay 46 displayCtrl 9320;
         if (!isNull _dc) then { ctrlDelete _dc };
@@ -20,8 +38,7 @@ AIC_clientPFH = [{
 
     // --- Zeus camera: seeing the field from above, never cull ---
     if (!isNull (findDisplay 312)) exitWith {
-        { if (!isNull _x) then { _x hideObject false } } forEach AIC_clientHidden;
-        { if (!isNull _x) then { _x hideObject false } } forEach AIC_clientSweepHidden;
+        { if (!isNull _x) then { _x hideObject false } } forEach (AIC_clientHidden + AIC_clientSweepHidden);
         AIC_clientHidden = []; AIC_clientQueue = []; AIC_clientCursor = 0; AIC_clientSweepHidden = [];
     };
 
@@ -38,24 +55,25 @@ AIC_clientPFH = [{
         !isPlayer _x && alive _x && (_x isKindOf "Man") && (_x distance player) < AIC_clientRadius
     };
 
-    // --- Every tick: reveal committed-set units that left the pool or closed inside the safe radius ---
+    // --- Every tick: reveal from the COMMITTED set (left pool / closed inside safe radius) ---
     {
         if (isNull _x) then { continue };
         if (!(_x in _candidates)) then { _x hideObject false; continue };
         if ((_x distance player) <= AIC_clientSafeRadius) then { _x hideObject false };
     } forEach AIC_clientHidden;
 
-    // --- Every tick: reveal and drop mid-sweep hidden units that no longer qualify ---
-    // Without this, units hidden during an incomplete sweep can linger invisible until the
-    // sweep finishes — the committed-set loop above only covers the previous sweep's units.
-    AIC_clientSweepHidden = AIC_clientSweepHidden select {
-        private _unit = _x;
-        if (isNull _unit || !alive _unit || !(_unit in _candidates) || (_unit distance player) <= AIC_clientSafeRadius) then {
-            if (!isNull _unit) then { _unit hideObject false };
-            false
-        } else {
-            true
-        };
+    // --- Every tick: reveal from the IN-PROGRESS sweep set too (closes the mid-sweep gap) + prune ---
+    if (AIC_clientSweepHidden isNotEqualTo []) then {
+        private _stillHidden = [];
+        {
+            if (isNull _x) then { continue };
+            if (!(_x in _candidates) || { (_x distance player) <= AIC_clientSafeRadius }) then {
+                _x hideObject false;
+            } else {
+                _stillHidden pushBack _x;
+            };
+        } forEach AIC_clientSweepHidden;
+        AIC_clientSweepHidden = _stillHidden;
     };
 
     // --- Start a new sweep when the previous one finished ---
@@ -65,11 +83,19 @@ AIC_clientPFH = [{
         AIC_clientSweepHidden = [];
     };
 
+    // --- Budget: size slices to clear the sweep in ~AIC_clientSweepTicks ticks (scales with pool size).
+    //     FPS-floor guard throttles to the slice floor only if frametime is genuinely collapsing. ---
+    AIC_clientBudget = ceil ((count AIC_clientQueue) / (AIC_clientSweepTicks max 1));
+    if (AIC_clientFpsAvg < AIC_clientFpsFloor) then {
+        AIC_clientBudget = AIC_clientBudget min AIC_clientBudgetMin;
+    };
+    AIC_clientBudget = AIC_clientBudget max 1 min AIC_clientBudgetMax;
+
     // --- Budgeted LOS work: process a slice of the queue this tick ---
     private _end = (AIC_clientCursor + AIC_clientBudget) min (count AIC_clientQueue);
     for "_i" from AIC_clientCursor to (_end - 1) do {
         private _unit = AIC_clientQueue select _i;
-        if (isNull _unit || {!alive _unit}) then { continue };
+        if (isNull _unit || { !alive _unit }) then { continue };
 
         if ((_unit distance player) <= AIC_clientSafeRadius) then {
             _unit hideObject false;   // moved inside safe radius since the snapshot
@@ -94,13 +120,13 @@ AIC_clientPFH = [{
     };
     AIC_clientCursor = _end;
 
-    // --- Sweep complete: reconcile committed hidden set, arm the next sweep ---
+    // --- Sweep complete: reconcile committed set, arm next sweep ---
     if (AIC_clientCursor >= (count AIC_clientQueue)) then {
         {
-            if (!isNull _x && {!(_x in AIC_clientSweepHidden)}) then { _x hideObject false };
+            if (!isNull _x && { !(_x in AIC_clientSweepHidden) }) then { _x hideObject false };
         } forEach AIC_clientHidden;
         AIC_clientHidden      = AIC_clientSweepHidden;
-        AIC_clientSweepHidden = [];   // reset immediately so the cleanup pass above doesn't re-process it next tick
+        AIC_clientSweepHidden = [];
         AIC_clientQueue       = [];
         AIC_clientCursor      = 0;
     };
@@ -122,7 +148,10 @@ AIC_clientPFH = [{
             private _hiddenCount = count AIC_clientHidden;
             private _rendered    = (count _candidates) - _hiddenCount;
             private _adsStr      = if (_ads) then { " [ADS]" } else { "" };
-            _dc ctrlSetText format ["CR: %1 vis | %2 hid%3 | sweep %4/%5", _rendered, _hiddenCount, _adsStr, AIC_clientCursor, count AIC_clientQueue];
+            _dc ctrlSetText format ["CR:%1v %2h%3 | fps%4 int%5 bud%6 | sweep%7/%8",
+                _rendered, _hiddenCount, _adsStr,
+                round AIC_clientFpsAvg, (AIC_clientInterval toFixed 2), AIC_clientBudget,
+                AIC_clientCursor, count AIC_clientQueue];
             _dc ctrlCommit 0;
         };
     } else {
@@ -130,4 +159,4 @@ AIC_clientPFH = [{
         if (!isNull _dc) then { ctrlDelete _dc };
     };
 
-}, AIC_clientInterval, []] call CBA_fnc_addPerFrameHandler;
+}, 0, [diag_tickTime]] call CBA_fnc_addPerFrameHandler;
