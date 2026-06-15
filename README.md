@@ -132,13 +132,12 @@ Click **▲/▼** to collapse or expand. Press **Backspace** to hide/show the pa
 
 Sits to the right of the main AIC panel. Controls the client-side model hider for all connected players simultaneously.
 
-| Field | Variable | Default | Description |
-|---|---|---|---|
-| Client Renderer | `AIC_clientEnabled` | ON | Toggle the renderer on or off |
-| Radius | `AIC_clientRadius` | 1500m | Max distance to check AI for occlusion — set to match your server's object view distance |
-| Safe Radius | `AIC_clientSafeRadius` | 75m | AI within this distance are always rendered to prevent pop-in |
-| Interval(s) | `AIC_clientInterval` | 0.3s | How often each client runs the LOS check |
-| Debug HUD | `AIC_clientDebug` | OFF | Enables a small on-screen overlay showing rendered vs hidden AI counts |
+| Field | Variable | Description |
+|---|---|---|
+| Client Renderer | `AIC_clientEnabled` | Toggle the renderer on or off |
+| Radius | `AIC_clientRadius` | Max distance to check AI for occlusion — auto-set from ACE view distance if ACE3 is loaded, otherwise 2000m. Can be overridden here |
+| Safe Radius | `AIC_clientSafeRadius` | AI within this distance are always rendered to prevent pop-in |
+| Debug HUD | `AIC_clientDebug` | Enables the on-screen overlay showing live renderer stats |
 
 Clicking **Apply** broadcasts all values to every connected client via `publicVariable`.
 
@@ -174,7 +173,7 @@ If **ZEN Enhanced Zeus** is loaded, a **Toggle Culler Protection** option appear
 
 ### How it works
 
-Each tick, every client runs a LOS check between the player's eye position and every living AI infantry unit within `AIC_clientRadius`. If a unit is fully occluded — hidden behind terrain or solid objects — its model is hidden via `hideObject`. It is shown again the moment LOS is restored.
+Each client runs a LOS check between the player's eye position and every living AI infantry unit within `AIC_clientRadius`. If a unit is fully occluded — hidden behind terrain or solid objects — its model is hidden via `hideObject`. It is shown again the moment LOS is restored.
 
 The check is intentionally permissive:
 - **Trees and bushes are ignored** — a unit behind a tree is still hidden, but the tree itself does not count as occlusion
@@ -184,6 +183,24 @@ The check is intentionally permissive:
 - **Zeus camera** — while the Zeus interface is open, no units are hidden. All previously hidden units are restored immediately on entry so the Zeus player sees the full battlefield
 
 `hideObject` is client-local — it affects only the machine running the check and does not change AI state or hitboxes for any other player.
+
+#### Adaptive cadence
+
+The renderer does not run on a fixed interval. It uses a 10-frame FPS EMA to continuously adjust its own tick rate via `linearConversion`:
+
+| FPS | Tick interval |
+|---|---|
+| 45+ | 0.2s (fastest) |
+| 15 | 1.0s (slowest) |
+| Between | Linear ramp |
+
+Under load the renderer backs off automatically, reducing its own contribution to frame time. When performance recovers it tightens back up without any manual adjustment.
+
+#### Budgeted LOS sweep
+
+Rather than checking every AI candidate in a single tick, the LOS work is spread across multiple ticks in slices. Each slice processes `ceil(poolSize / AIC_clientSweepTicks)` units (default: targets completion in ~4 ticks). This eliminates single-tick spikes when many AI are in radius — frame cost is capped and predictable regardless of AI count.
+
+If FPS drops below `AIC_clientFpsFloor`, the slice size is throttled down to `AIC_clientBudgetMin` to protect frame time at the cost of slower sweep completion. Both limits are clamped to `AIC_clientBudgetMax` (default 40) as a spike guard.
 
 ### Why this helps
 
@@ -196,10 +213,19 @@ This is architecturally different from mods like A3PE (Arma 3 Performance Extens
 When **Debug HUD** is enabled from the Zeus Client Renderer panel, a small yellow overlay appears in the bottom-left corner of every client's screen:
 
 ```
-CR: 47 visible | 112 hidden [ADS]
+CR:47v 112h [ADS] | fps45 int0.20 bud25 | sweep25/100
 ```
 
-`[ADS]` appears when the cone override is active (RMB held or optic view open). This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
+| Field | Description |
+|---|---|
+| `47v 112h` | Visible and hidden AI counts |
+| `[ADS]` | ADS cone override is active (RMB held or optic view open) |
+| `fps45` | Smoothed FPS average driving the cadence |
+| `int0.20` | Current tick interval in seconds |
+| `bud25` | Current LOS slice size (raycasts this tick) |
+| `sweep25/100` | Cursor position in the current sweep queue |
+
+This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
 
 ### Default settings
 
@@ -208,20 +234,38 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 | Variable | Default | Description |
 |---|---|---|
 | `AIC_clientEnabled` | true | Enable the renderer on load |
-| `AIC_clientRadius` | 1500m | Max LOS check radius — match your server's object view distance |
 | `AIC_clientSafeRadius` | 75m | Always-render radius around the player |
-| `AIC_clientInterval` | 0.3s | Seconds between each LOS pass |
 | `AIC_clientDebug` | false | Show debug HUD on load |
+
+**Radius** — `AIC_clientRadius` is no longer a static default. If ACE3 is loaded it is read from `ace_viewdistance_viewDistanceOnFoot` at mission start and kept in sync every 30 seconds. Without ACE3 it falls back to 2000m. It can still be overridden live from the Zeus Client Renderer panel.
+
+**Adaptive cadence knobs:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `AIC_clientIntervalMin` | 0.2s | Fastest tick rate, used at or above `FpsTarget` |
+| `AIC_clientIntervalMax` | 1.0s | Slowest tick rate, used at or below `FpsFloor` |
+| `AIC_clientFpsTarget` | 45 | FPS at which the fastest cadence is used |
+| `AIC_clientFpsFloor` | 15 | FPS at which the slowest cadence and minimum budget kick in |
+
+**Budget knobs:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `AIC_clientSweepTicks` | 4 | Target number of ticks to complete a full LOS sweep — primary tuning lever |
+| `AIC_clientBudgetMin` | 10 | Minimum LOS checks per tick when FPS is below `FpsFloor` |
+| `AIC_clientBudgetMax` | 40 | Hard cap on LOS checks per tick regardless of pool size |
 
 ---
 
 ## Compatibility
 
+- ✅ CBA_A3 (required by `aic_client`)
 - ✅ LAMBS Danger
 - ✅ Headless Clients
 - ✅ Civilian Presence Module
 - ✅ Zeus / Curator
-- ✅ ACE3
+- ✅ ACE3 (view distance auto-sync when loaded)
 - ✅ ZEN Enhanced Zeus (context menu integration)
 - ⚠️ Vcom AI — not tested, may conflict
 
@@ -261,6 +305,17 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.2.0
+- Client renderer tick rate is now adaptive — a 10-frame FPS EMA drives a `linearConversion` ramp between 0.2s (45fps+) and 1.0s (15fps), reducing renderer overhead automatically under load
+- LOS work is now spread across multiple ticks in budgeted slices instead of evaluating all candidates in one pass — eliminates single-tick spikes on high AI count missions
+- Slice size scales dynamically with pool size (`ceil(queueSize / AIC_clientSweepTicks)`), targeting sweep completion in ~4 ticks; clamped to `AIC_clientBudgetMax` (40) as a spike guard
+- FPS floor guard (`AIC_clientFpsFloor = 15`) throttles the slice size to `AIC_clientBudgetMin` (10) when frames are genuinely collapsing, protecting frame time at the cost of slower sweep completion
+- `AIC_clientRadius` is now auto-detected from ACE view distance on foot at mission start and polled every 30 seconds (real-time) to track mid-mission changes; falls back to 2000m without ACE3
+- Fixed: units hidden early in a multi-tick sweep are now revealed immediately if they enter the safe radius or leave the candidate pool — previously they lingered invisible until the sweep finished
+- Fixed: disabling the renderer or entering Zeus while a sweep was in progress left mid-sweep hidden units permanently invisible — both branches now reveal all hidden units before clearing state
+- Debug HUD updated to show live FPS average, current interval, current budget, and sweep progress alongside visible/hidden counts
+- Added `cba_main` as a required addon for `aic_client`
 
 ### v3.1.2
 - Classification loop now yields between every 25-unit chunk instead of running synchronously, eliminating per-tick FPS spikes on the server
