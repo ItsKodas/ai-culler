@@ -102,7 +102,7 @@ while {true} do {
                     if (_hasLOS) then {
                         _inRangeLOS pushBack _unit;
                     } else {
-                        _inRangeNoLOS pushBack _unit;
+                        _inRangeNoLOS pushBack [_unit, _nearestDist];
                     };
                 };
             };
@@ -124,14 +124,17 @@ while {true} do {
         _activeCount = _activeCount + 1;
     } forEach _inRangeLOS;
 
+    // Sort ascending by distance so the closest no-LOS units fill the cap first
+    _inRangeNoLOS = [_inRangeNoLOS, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
     {
+        private _unit = _x select 0;
         if (_activeCount < AIC_maxActiveAI) then {
-            if (_x getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _x };
-            [_x] call AIC_fnc_enableUnit;
+            if (_unit getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _unit };
+            [_unit] call AIC_fnc_enableUnit;
             _activeCount = _activeCount + 1;
         } else {
-            if (!(_x getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _x };
-            [_x] call AIC_fnc_disableUnit;
+            if (!(_unit getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _unit };
+            [_unit] call AIC_fnc_disableUnit;
         };
     } forEach _inRangeNoLOS;
 
