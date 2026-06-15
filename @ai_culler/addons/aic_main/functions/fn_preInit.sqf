@@ -1,4 +1,4 @@
-AIC_maxActiveAI      = 100;
+AIC_maxActiveAI      = 200;
 AIC_distBlufor       = 2000;
 AIC_distOpfor        = 2000;
 AIC_distIndependent  = 2000;

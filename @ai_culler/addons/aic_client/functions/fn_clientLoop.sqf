@@ -137,7 +137,7 @@ AIC_clientPFH = [{
         if (isNull _dc) then {
             _dc = (findDisplay 46) ctrlCreate ["RscText", 9320];
             if (!isNull _dc) then {
-                _dc ctrlSetPosition [safeZoneX + 0.005, safeZoneY + safeZoneH - 0.05, 0.39, 0.033];
+                _dc ctrlSetPosition [safeZoneX + 0.005, safeZoneY + safeZoneH - 0.05, 0.51, 0.033];
                 _dc ctrlSetTextColor [1, 1, 0.3, 1];
                 _dc ctrlSetBackgroundColor [0, 0, 0, 0.55];
                 _dc ctrlShow true;

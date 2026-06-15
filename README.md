@@ -58,7 +58,7 @@ Open Zeus → click **Settings** in the AIC status window to adjust values live.
 
 | Field | Variable | Default |
 |---|---|---|
-| Max AI | `AIC_maxActiveAI` | 100 |
+| Max AI | `AIC_maxActiveAI` | 200 |
 | Dist BLUFOR | `AIC_distBlufor` | 2000m |
 | Dist OPFOR | `AIC_distOpfor` | 2000m |
 | Dist Indep | `AIC_distIndependent` | 2000m |
@@ -74,7 +74,7 @@ Edit `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and rebuild the PBO:
 
 | Variable | Default | Description |
 |---|---|---|
-| `AIC_maxActiveAI` | 100 | Hard cap on simultaneously active AI |
+| `AIC_maxActiveAI` | 200 | Hard cap on simultaneously active AI |
 | `AIC_distBlufor` | 2000m | Cull distance for BLUFOR (west) |
 | `AIC_distOpfor` | 2000m | Cull distance for OPFOR (east) |
 | `AIC_distIndependent` | 2000m | Cull distance for Independent |
