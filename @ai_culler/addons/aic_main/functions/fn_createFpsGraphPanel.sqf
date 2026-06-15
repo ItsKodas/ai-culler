@@ -10,7 +10,7 @@ if (isNull _display) exitWith {};
 private _gx    = safeZoneX + 0.35;
 private _gw    = 0.38;
 private _tH    = 0.036;
-private _gH    = 0.066;   // sparkline area height (~2 row-heights)
+private _gH    = 0.155;   // bar chart area height (up to 8 rows)
 private _legH  = 0.022;
 private _pad   = 0.006;
 private _total = _tH + _pad + _gH + _pad + _legH + _pad;
@@ -41,7 +41,7 @@ _graphCtrl ctrlCommit 0;
 // Legend: colour key left, time axis right
 private _legendCtrl = _display ctrlCreate ["RscText", 9254];
 _legendCtrl ctrlSetPosition [_gx + 0.005, _gy + _tH + _pad + _gH + _pad, _gw - 0.01, _legH];
-_legendCtrl ctrlSetText "green >=40fps   yellow >=25fps   red <25fps              <- older   now ->";
+_legendCtrl ctrlSetText "  O = server FPS reading        older <--------> newer";
 _legendCtrl ctrlSetTextColor [0.55, 0.55, 0.55, 1];
 _legendCtrl ctrlShow false;
 _legendCtrl ctrlCommit 0;

@@ -1,6 +1,6 @@
-// AIC_fnc_renderFpsGraph — redraws the server FPS sparkline from AIC_fpsHistory.
-// Called by the 1-second FPS refresh loop and immediately on panel open.
-// Exits silently when the Zeus display or graph panel is not visible.
+// AIC_fnc_renderFpsGraph — redraws the server FPS bar chart from AIC_fpsHistory.
+// Y-axis = FPS level (auto-scaled), X-axis = time (left=older, right=newer).
+// Called by the 1-second refresh loop and on panel open.
 private _display = findDisplay 312;
 if (isNull _display) exitWith {};
 private _graphCtrl = _display displayCtrl 9253;
@@ -15,9 +15,43 @@ if (_n == 0) exitWith {
     _graphCtrl ctrlCommit 0;
 };
 
-// Downsample to _maxCols evenly-spaced points so the sparkline always fills
-// the panel width regardless of how much history has been collected.
-private _maxCols = 55;
+// Compute stats
+private _sum = 0;
+private _maxFPS = 0;
+private _minFPS = 9999;
+{
+    _sum = _sum + _x;
+    if (_x > _maxFPS) then { _maxFPS = _x };
+    if (_x < _minFPS) then { _minFPS = _x };
+} forEach _history;
+private _avgFPS = round (_sum / _n);
+
+// Update title bar with live average, min, max
+private _titleCtrl = _display displayCtrl 9252;
+if (!isNull _titleCtrl) then {
+    _titleCtrl ctrlSetText format ["Server FPS   avg: %1   min: %2   max: %3", _avgFPS, _minFPS, _maxFPS];
+    _titleCtrl ctrlCommit 0;
+};
+
+// Auto-scale Y axis in steps of 10, clamped to 4-8 rows
+private _topRow = (ceil  (_maxFPS / 10)) * 10;
+private _botRow = (floor (_minFPS / 10)) * 10;
+if (_topRow == _botRow) then { _topRow = _botRow + 10 };
+
+// Expand to minimum 4 rows (40 FPS range)
+if ((_topRow - _botRow) < 40) then {
+    private _mid = (floor ((_topRow + _botRow) / 20)) * 10;
+    _topRow = _mid + 20;
+    _botRow = _mid - 20;
+    if (_botRow < 0) then { _botRow = 0 };
+    if ((_topRow - _botRow) < 40) then { _topRow = _botRow + 40 };
+};
+
+// Cap at 8 rows max; trim from the bottom
+if ((_topRow - _botRow) > 80) then { _botRow = _topRow - 80 };
+
+// Downsample time axis to 45 display columns
+private _maxCols = 45;
 private _displayData = [];
 if (_n <= _maxCols) then {
     _displayData = _history;
@@ -27,19 +61,27 @@ if (_n <= _maxCols) then {
     };
 };
 
-// ASCII height chars ordered low -> high (avoids multi-byte UTF-8 which
-// can confuse Arma's SQF preprocessor when read as Windows-1252).
-private _maxFPS    = 60;
-private _heightChars = ["_", ".", "-", "~", "+", "s", "I", "#"];
-private _text      = "";
-{
-    private _fps   = _x min _maxFPS max 0;
-    private _idx   = floor (_fps / _maxFPS * 7) min 7;
-    private _char  = _heightChars select _idx;
-    private _color = if (_fps >= 40) then { "#44ff88" } else {
-                     if (_fps >= 25) then { "#ffcc22" } else { "#ff4444" } };
-    _text = _text + format ["<t size='2' color='%1'>%2</t>", _color, _char];
-} forEach _displayData;
+// Build bar chart: one row per FPS level, O where fps >= that level
+private _text = "";
+private _row = _topRow;
+while { _row >= _botRow } do {
+    // Right-align label in 3 chars, e.g. " 50" or "100"
+    private _lbl = str _row;
+    if ((count _lbl) < 3) then { _lbl = " " + _lbl };
+    if ((count _lbl) < 3) then { _lbl = " " + _lbl };
+
+    // Build the dot string for this row
+    private _rowStr = "";
+    { _rowStr = _rowStr + (if (_x >= _row) then { "O" } else { " " }); } forEach _displayData;
+
+    _text = _text + format [
+        "<t font='LucidaConsoleB' size='0.7' color='#666666'>%1|</t><t font='LucidaConsoleB' size='0.7' color='#44ff88'>%2</t><br/>",
+        _lbl,
+        _rowStr
+    ];
+
+    _row = _row - 10;
+};
 
 _graphCtrl ctrlSetStructuredText parseText _text;
 _graphCtrl ctrlCommit 0;
