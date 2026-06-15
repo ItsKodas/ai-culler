@@ -12,9 +12,9 @@ AIC_clientFpsFloor    = 15;    // at/below: widest interval + budget throttle
 AIC_clientFpsTarget   = 45;    // at/above: tightest interval
 
 // --- Pool-size budget (target ~50-100 AI high end) ---
-AIC_clientSweepTicks = 4;      // clear any sweep in ~this many ticks (primary knob)
+AIC_clientSweepTicks = 3;      // clear any sweep in ~this many ticks (primary knob)
 AIC_clientBudgetMin  = 10;     // slice floor when FPS is collapsing
-AIC_clientBudgetMax  = 40;     // snug spike-guard above the 100-AI target
+AIC_clientBudgetMax  = 60;     // spike-guard; handles ~200 AI in ~4 ticks at 0.2s cadence
 
 // postInit: player is already initialised — no spawn or sleep needed
 private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");

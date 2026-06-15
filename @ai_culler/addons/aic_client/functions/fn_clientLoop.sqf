@@ -1,5 +1,5 @@
 // AIC_fnc_clientLoop — registers the adaptive per-frame culling handler
-// Design target: ~50-100 AI in radius at the high end.
+// Design target: ~100-200 AI in radius at the high end.
 if (!hasInterface) exitWith {};
 if (!isNil "AIC_clientPFH") exitWith {};            // already running, don't double-register
 

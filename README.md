@@ -252,9 +252,9 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 
 | Variable | Default | Description |
 |---|---|---|
-| `AIC_clientSweepTicks` | 4 | Target number of ticks to complete a full LOS sweep — primary tuning lever |
+| `AIC_clientSweepTicks` | 3 | Target number of ticks to complete a full LOS sweep — primary tuning lever |
 | `AIC_clientBudgetMin` | 10 | Minimum LOS checks per tick when FPS is below `FpsFloor` |
-| `AIC_clientBudgetMax` | 40 | Hard cap on LOS checks per tick regardless of pool size |
+| `AIC_clientBudgetMax` | 60 | Hard cap on LOS checks per tick regardless of pool size |
 
 ---
 
