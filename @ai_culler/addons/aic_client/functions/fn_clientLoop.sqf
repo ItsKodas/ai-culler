@@ -47,7 +47,7 @@ while {true} do {
 
             // If terrain is clear, check solid objects (ignore trees and bushes)
             if (!_blocked) then {
-                private _hits = lineIntersectsObjs [_playerEyePos, _unitEyePos, player, _unit];
+                private _hits = lineIntersectsObjs [_playerEyePos, _unitEyePos, vehicle player, _unit];
                 _blocked = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) != -1;
             };
 
