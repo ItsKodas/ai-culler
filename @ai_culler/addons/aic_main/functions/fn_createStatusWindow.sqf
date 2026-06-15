@@ -46,10 +46,14 @@ _collapseBtn ctrlAddEventHandler ["ButtonClick", {
 
     if (_collapse) then {
         { (_disp displayCtrl _x) ctrlShow false; (_disp displayCtrl _x) ctrlCommit 0; }
-            forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
+            forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220,9251,9252,9253,9254];
     } else {
         { (_disp displayCtrl _x) ctrlShow true; (_disp displayCtrl _x) ctrlCommit 0; }
-            forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209];
+            forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250];
+        if ((_disp displayCtrl 9250) getVariable ["AIC_graphOpen", false]) then {
+            { (_disp displayCtrl _x) ctrlShow true; (_disp displayCtrl _x) ctrlCommit 0; }
+                forEach [9251,9252,9253,9254];
+        };
         if ((_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false]) then {
             { (_disp displayCtrl _x) ctrlShow true; (_disp displayCtrl _x) ctrlCommit 0; }
                 forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
@@ -112,9 +116,12 @@ _toggleBtn ctrlAddEventHandler ["ButtonClick", {
     _btn ctrlCommit 0;
 }];
 
-// Settings toggle button (row 7)
+// Row 7: Settings (left half) + FPS Graph (right half)
+private _halfBtnW = (_w - 0.018) / 2;
+
+// Settings toggle button (row 7, left half)
 private _settingsToggle = _display ctrlCreate ["RscButton", 9209];
-_settingsToggle ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 7), _w - 0.014, _rH - 0.004];
+_settingsToggle ctrlSetPosition [_wx + 0.007, _y + _tH + 0.006 + (_rH * 7), _halfBtnW, _rH - 0.004];
 _settingsToggle ctrlSetText "Settings";
 _settingsToggle ctrlCommit 0;
 _settingsToggle setVariable ["AIC_settingsOpen", false];
@@ -150,6 +157,23 @@ _settingsToggle ctrlAddEventHandler ["ButtonClick", {
         if (_open) then {_tH3 + (_rH3 * 18) + 0.012} else {_tH3 + (_rH3 * 8) + 0.012}
     ];
     _bg3 ctrlCommit 0;
+}];
+
+// FPS Graph toggle button (row 7, right half)
+private _graphToggle = _display ctrlCreate ["RscButton", 9250];
+_graphToggle ctrlSetPosition [_wx + 0.007 + _halfBtnW + 0.004, _y + _tH + 0.006 + (_rH * 7), _halfBtnW, _rH - 0.004];
+_graphToggle ctrlSetText "FPS Graph";
+_graphToggle ctrlCommit 0;
+_graphToggle setVariable ["AIC_graphOpen", false];
+
+_graphToggle ctrlAddEventHandler ["ButtonClick", {
+    params ["_btn"];
+    private _disp = ctrlParent _btn;
+    private _open = !(_btn getVariable ["AIC_graphOpen", false]);
+    _btn setVariable ["AIC_graphOpen", _open];
+    { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow _open; _c ctrlCommit 0; }; }
+        forEach [9251,9252,9253,9254];
+    if (_open) then { [] call AIC_fnc_renderFpsGraph };
 }];
 
 // Settings sub-section — label + edit pairs, rows 8–15 (initially hidden)

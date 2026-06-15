@@ -31,7 +31,9 @@ class CfgFunctions {
             class updateStatusWindow {};
             class setCullerEnabled  {};
             class applySettings     {};
-            class updateUnitLabel   {};
+            class updateUnitLabel      {};
+            class createFpsGraphPanel  {};
+            class renderFpsGraph       {};
         };
     };
 };
