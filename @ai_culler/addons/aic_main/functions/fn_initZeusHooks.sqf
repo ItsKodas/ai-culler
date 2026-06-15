@@ -46,20 +46,24 @@ if (!hasInterface) exitWith {};
                 if (!isNull _disp) then {
                     private _srvCtrl = _disp displayCtrl 9230;
                     private _cltCtrl = _disp displayCtrl 9231;
-                    if (!isNull _srvCtrl) then { _srvCtrl ctrlSetText format ["Srv FPS: %1", AIC_serverFPS]; _srvCtrl ctrlCommit 0; };
+                    if (!isNull _srvCtrl) then {
+                        _srvCtrl ctrlSetText format ["Srv FPS: %1", if (!isNil "AIC_serverFPS") then { AIC_serverFPS } else { "..." }];
+                        _srvCtrl ctrlCommit 0;
+                    };
                     if (!isNull _cltCtrl) then { _cltCtrl ctrlSetText format ["Clt FPS: %1", round diag_fps]; _cltCtrl ctrlCommit 0; };
                 };
             };
         };
 
-        // Refresh name prefixes for units already flagged
-        { if (alive _x && _x isKindOf "Man" && !isPlayer _x) then { [_x] call AIC_fnc_updateUnitLabel; }; } forEach allUnits;
+        // Batch-refresh name prefixes for all currently flagged units
+        private _labelled = allUnits select { alive _x && _x isKindOf "CAManBase" && !isPlayer _x };
+        if (_labelled isNotEqualTo []) then { [_labelled] call AIC_fnc_updateUnitLabel };
 
         // Draw floating 3D labels above protected/culled/overridden units — visible only to this Zeus client
         _drawEH = addMissionEventHandler ["Draw3D", {
             private _camPos = positionCameraToWorld [0,0,0];
             {
-                private _prot = _x getVariable ["zeusProtected", false];
+                private _prot = _x getVariable ["AIC_zeusProtected", false];
                 private _cull = _x getVariable ["AIC_disabled",  false];
                 private _over = !_cull && !_prot && (group _x) getVariable ["AIC_zeusWaypoint", false];
                 if (_prot || _cull || _over) then {
@@ -88,7 +92,7 @@ if (!isNil "zen_context_menu_fnc_createAction") then {
         "Toggle Culler Protection",
         "",
         { [_objects] remoteExec ["AIC_fnc_toggleProtection", 2]; },
-        { _objects findIf { alive _x && !isPlayer _x && _x isKindOf "Man" } != -1 }
+        { _objects findIf { alive _x && !isPlayer _x && _x isKindOf "CAManBase" } != -1 }
     ] call zen_context_menu_fnc_createAction;
     [_action] call zen_context_menu_fnc_addAction;
     if (AIC_debug) then { diag_log "[AIC] ZEN context menu: Toggle Culler Protection registered"; };

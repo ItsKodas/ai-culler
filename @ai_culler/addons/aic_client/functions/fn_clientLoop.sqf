@@ -15,8 +15,8 @@ AIC_clientPFH = [{
     params ["_args"];
     _args params ["_lastRun"];
 
-    // --- Smoothed FPS (~10-frame EMA) drives cadence; floor-guards the budget ---
-    AIC_clientFpsAvg = AIC_clientFpsAvg + 0.1 * (diag_fps - AIC_clientFpsAvg);
+    // diag_fps is Arma's built-in 16-frame rolling average — no additional smoothing needed
+    AIC_clientFpsAvg = diag_fps;
 
     // Cadence: low FPS backs off, high FPS stays responsive
     AIC_clientInterval = linearConversion [

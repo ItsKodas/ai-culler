@@ -61,12 +61,12 @@ Open Zeus → click **Settings** in the AIC status window to adjust values live.
 | Max AI | `AIC_maxActiveAI` | 100 |
 | Dist BLUFOR | `AIC_distBlufor` | 2000m |
 | Dist OPFOR | `AIC_distOpfor` | 2000m |
-| Dist Indep | `AIC_distIndependent` | 1000m |
+| Dist Indep | `AIC_distIndependent` | 2000m |
 | Dist Civ | `AIC_distCivilian` | 500m |
 | Interval(s) | `AIC_checkInterval` | 5s |
 | Min Radius | `AIC_minActiveRadius` | 200m |
 | Combat Rad | `AIC_combatRadius` | 400m |
-| Debug | `AIC_debug` | ON |
+| Debug | `AIC_debug` | OFF |
 
 #### Pre-op (edit defaults)
 
@@ -77,12 +77,12 @@ Edit `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and rebuild the PBO:
 | `AIC_maxActiveAI` | 100 | Hard cap on simultaneously active AI |
 | `AIC_distBlufor` | 2000m | Cull distance for BLUFOR (west) |
 | `AIC_distOpfor` | 2000m | Cull distance for OPFOR (east) |
-| `AIC_distIndependent` | 1000m | Cull distance for Independent |
+| `AIC_distIndependent` | 2000m | Cull distance for Independent |
 | `AIC_distCivilian` | 500m | Cull distance for Civilians |
 | `AIC_checkInterval` | 5s | How often the culler runs — also controls load spreading (see below) |
 | `AIC_minActiveRadius` | 200m | Units within this radius are always active (no LOS check) |
 | `AIC_combatRadius` | 400m | Radius used to detect AI vs AI combat engagement |
-| `AIC_debug` | true | RPT logging — set to `false` for live ops |
+| `AIC_debug` | false | RPT logging — enable for diagnostics only |
 
 #### Performance tuning with `AIC_checkInterval`
 
@@ -186,7 +186,7 @@ The check is intentionally permissive:
 
 #### Adaptive cadence
 
-The renderer does not run on a fixed interval. It uses a 10-frame FPS EMA to continuously adjust its own tick rate via `linearConversion`:
+The renderer does not run on a fixed interval. It uses Arma's built-in 16-frame `diag_fps` rolling average to continuously adjust its own tick rate via `linearConversion`:
 
 | FPS | Tick interval |
 |---|---|
@@ -261,7 +261,7 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ## Compatibility
 
 - ✅ CBA_A3 (required by `aic_client`)
-- ✅ LAMBS Danger
+- ✅ LAMBS Danger (AI behaviour state preserved on enable/disable — no longer overwritten)
 - ✅ Headless Clients
 - ✅ Civilian Presence Module
 - ✅ Zeus / Curator
@@ -296,7 +296,7 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
     └── aic_client/                        # Client-side model renderer
         ├── config.cpp
         └── functions/
-            ├── fn_clientPreInit.sqf       # Defaults + spawns loop on mission start
+            ├── fn_clientPreInit.sqf       # Defaults + initialises renderer at mission start
             ├── fn_clientLoop.sqf          # Per-tick LOS check and hideObject calls
             ├── fn_clientZeusHooks.sqf     # Client Renderer panel lifecycle in Zeus
             └── fn_createClientPanel.sqf   # Builds the Zeus Client Renderer UI controls
@@ -305,6 +305,20 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.3.0
+- LOS check now evaluated against **all** connected players — a unit is kept active if any player has line of sight, not just the nearest. Previously a unit could be incorrectly culled while visible to a second player standing elsewhere
+- `CAManBase` replaces `Man` in all unit filters — ensures full coverage of modded infantry that inherit from `CAManBase` but not `Man`
+- `AIC_zeusProtected` variable tag added to the protection flag (was untagged `zeusProtected`) — prevents potential conflicts with other mods or mission scripts using the same name
+- `disableAI "ALL"` / `enableAI "ALL"` removed — simulation state is now saved before disabling and restored on re-enable, preserving AI behaviour modifications set by other mods (LAMBS, etc.)
+- Zeus stats (`AIC_serverFPS`, status window data) now sent only to active curator clients via `publicVariableClient` instead of broadcast to all players — reduces unnecessary network traffic
+- Label updates (unit name prefixes) now sent as a single batched `remoteExec` per tick covering only units whose state changed — previously one network call per unit
+- Toggle protection now uses smart group logic: protects all selected units if any are unprotected; only unprotects when all are already protected — more predictable with mixed selections
+- Client renderer now runs inline at `postInit` time instead of spawning a thread to wait for player initialisation
+- Client renderer FPS input simplified to Arma's native 16-frame `diag_fps` rolling average — the previous EMA was double-smoothing an already-averaged value
+- Fixed: nil guard added to Zeus FPS display — prevents a brief display error before the server sends its first `AIC_serverFPS` update
+- Default `AIC_distIndependent` corrected to 2000m (was 1000m, an unintentional asymmetry versus BLUFOR/OPFOR defaults)
+- Default `AIC_debug` corrected to `false` (was incorrectly left as `true` in the released mod)
 
 ### v3.2.0
 - Client renderer tick rate is now adaptive — a 10-frame FPS EMA drives a `linearConversion` ramp between 0.2s (45fps+) and 1.0s (15fps), reducing renderer overhead automatically under load

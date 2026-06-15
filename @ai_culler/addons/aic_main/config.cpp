@@ -42,7 +42,7 @@ class CfgCuratorContextActions {
         icon = "";
         priority = 10;
         cursorOver = "";
-        condition = "{ alive _x && !isPlayer _x && (_x isKindOf 'Man') } count (_this select 2) > 0";
+        condition = "{ alive _x && !isPlayer _x && (_x isKindOf 'CAManBase') } count (_this select 2) > 0";
         statement = "[_this select 2] remoteExec ['AIC_fnc_toggleProtection', 2];";
     };
 };

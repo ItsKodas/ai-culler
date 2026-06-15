@@ -5,10 +5,13 @@ diag_log "[AIC] Starting culler loop";
 while {true} do {
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
-        { [_x] call AIC_fnc_enableUnit; } forEach (allUnits select { _x getVariable ["AIC_disabled", false] });
-        private _totalAI   = { alive _x && _x isKindOf "Man" && !isPlayer _x } count allUnits;
-        private _serverFPS = AIC_serverFPS;
-        [0, 0, 0, 0, 0, 0, 0, _totalAI, _serverFPS] call AIC_fnc_broadcastStats;
+        private _toEnable = allUnits select { _x getVariable ["AIC_disabled", false] };
+        { [_x] call AIC_fnc_enableUnit; } forEach _toEnable;
+        if (_toEnable isNotEqualTo []) then {
+            [_toEnable] remoteExec ["AIC_fnc_updateUnitLabel", 0];
+        };
+        private _totalAI = { alive _x && _x isKindOf "CAManBase" && !isPlayer _x } count allUnits;
+        [0, 0, 0, 0, 0, 0, 0, _totalAI, AIC_serverFPS] call AIC_fnc_broadcastStats;
         sleep AIC_checkInterval;
         continue;
     };
@@ -21,24 +24,25 @@ while {true} do {
     // Count protected infantry before the main filter excludes them
     private _protectedCount = {
         alive _x &&
-        _x isKindOf "Man" &&
+        _x isKindOf "CAManBase" &&
         !isPlayer _x &&
-        (_x getVariable ["zeusProtected", false]) &&
+        (_x getVariable ["AIC_zeusProtected", false]) &&
         (side _x in [west, east, resistance, civilian])
     } count allUnits;
 
     // Managed pool: living AI infantry, unprotected, all factions
     private _allAI = allUnits select {
         alive _x &&
-        _x isKindOf "Man" &&
+        _x isKindOf "CAManBase" &&
         !isPlayer _x &&
-        !(_x getVariable ["zeusProtected", false]) &&
+        !(_x getVariable ["AIC_zeusProtected", false]) &&
         (side _x in [west, east, resistance, civilian])
     };
 
     private _outOfRange   = [];
     private _inRangeNoLOS = [];
     private _inRangeLOS   = [];
+    private _labelUpdates = [];
 
     // Process in chunks of 25, yielding between chunks to spread raycasts and
     // nearEntities calls across time rather than blocking the server thread.
@@ -50,26 +54,20 @@ while {true} do {
     private _chunkCount = 0;
     {
         private _unit = _x;
-        // Unit may have died during a yield between chunks
-        if (!alive _unit) then { continue; };
+        // Unit may have died or been protected during a yield between chunks
+        if (!alive _unit || { _unit getVariable ["AIC_zeusProtected", false] }) then { continue };
 
         private _cullDist = [_unit] call AIC_fnc_getCullDist;
 
-        // Pass 1: find nearest reference point (player body or Zeus camera)
-        private _nearestDist   = 99999;
-        private _nearestEyePos = [0,0,0];
-        private _nearestPlayer = objNull;
+        // Find nearest reference point distance (for range check)
+        private _nearestDist = 99999;
         {
             private _d = _unit distance (_x select 0);
-            if (_d < _nearestDist) then {
-                _nearestDist   = _d;
-                _nearestEyePos = _x select 0;
-                _nearestPlayer = _x select 1;
-            };
+            if (_d < _nearestDist) then { _nearestDist = _d };
         } forEach _refPoints;
 
         private _inCombat = side _unit != civilian && {
-            _unit nearEntities [["Man"], AIC_combatRadius] findIf {
+            _unit nearEntities [["CAManBase"], AIC_combatRadius] findIf {
                 alive _x && !isPlayer _x && side _x != civilian &&
                 (side _x getFriend side _unit) < 0.6
             } != -1
@@ -77,28 +75,34 @@ while {true} do {
 
         if ((group _unit) getVariable ["AIC_zeusWaypoint", false] || _inCombat) then {
             // Zeus-assigned waypoint or AI vs AI combat — active regardless of player proximity
-            _inRangeLOS pushBack [_unit, _nearestDist];
+            _inRangeLOS pushBack _unit;
         } else {
             if (_nearestDist > _cullDist) then {
                 // Out of range — cull
-                _outOfRange pushBack [_unit, _nearestDist];
+                _outOfRange pushBack _unit;
             } else {
-                if (_nearestDist <= AIC_minActiveRadius) then {
-                    // Within minimum active radius — always active, skip raycast
-                    _inRangeLOS pushBack [_unit, _nearestDist];
+                if ((_refPoints findIf { _unit distance (_x select 0) <= AIC_minActiveRadius }) != -1) then {
+                    // Within minimum active radius of any player — always active, skip raycast
+                    _inRangeLOS pushBack _unit;
                 } else {
-                    // LOS check against nearest player body
+                    // LOS check against ALL players — active if any has line of sight
                     // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
-                    private _hasLOS = !(terrainIntersectASL [_nearestEyePos, eyePos _unit]);
-                    if (_hasLOS) then {
-                        private _hits = lineIntersectsObjs [_nearestEyePos, eyePos _unit, _nearestPlayer, _unit];
-                        _hasLOS = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
-                    };
+                    private _unitEyePos = eyePos _unit;
+                    private _hasLOS = (_refPoints findIf {
+                        private _eyePos = _x select 0;
+                        private _player = _x select 1;
+                        private _los = !(terrainIntersectASL [_eyePos, _unitEyePos]);
+                        if (_los) then {
+                            private _hits = lineIntersectsObjs [_eyePos, _unitEyePos, _player, _unit];
+                            _los = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                        };
+                        _los
+                    }) != -1;
 
                     if (_hasLOS) then {
-                        _inRangeLOS pushBack [_unit, _nearestDist];
+                        _inRangeLOS pushBack _unit;
                     } else {
-                        _inRangeNoLOS pushBack [_unit, _nearestDist];
+                        _inRangeNoLOS pushBack _unit;
                     };
                 };
             };
@@ -108,31 +112,36 @@ while {true} do {
         if ((_chunkCount % _chunkSize) == 0 && _chunkCount < count _allAI) then { sleep _yieldTime; };
     } forEach _allAI;
 
-    _outOfRange   = [_outOfRange,   [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
-    _inRangeNoLOS = [_inRangeNoLOS, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
-
-    { [_x select 0] call AIC_fnc_disableUnit; } forEach _outOfRange;
+    {
+        if (!(_x getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _x };
+        [_x] call AIC_fnc_disableUnit;
+    } forEach _outOfRange;
 
     private _activeCount = 0;
     {
-        [_x select 0] call AIC_fnc_enableUnit;
+        if (_x getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _x };
+        [_x] call AIC_fnc_enableUnit;
         _activeCount = _activeCount + 1;
     } forEach _inRangeLOS;
 
     {
-        private _unit = _x select 0;
         if (_activeCount < AIC_maxActiveAI) then {
-            [_unit] call AIC_fnc_enableUnit;
+            if (_x getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _x };
+            [_x] call AIC_fnc_enableUnit;
             _activeCount = _activeCount + 1;
         } else {
-            [_unit] call AIC_fnc_disableUnit;
+            if (!(_x getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _x };
+            [_x] call AIC_fnc_disableUnit;
         };
     } forEach _inRangeNoLOS;
 
-    private _culledCount    = (count _allAI) - _activeCount;
-    private _overrideCount  = { (group _x) getVariable ["AIC_zeusWaypoint", false] } count _allAI;
-    private _totalAI        = (count _allAI) + _protectedCount;
-    private _serverFPS      = AIC_serverFPS;
+    if (_labelUpdates isNotEqualTo []) then {
+        [_labelUpdates] remoteExec ["AIC_fnc_updateUnitLabel", 0];
+    };
+
+    private _culledCount   = (count _allAI) - _activeCount;
+    private _overrideCount = { (group _x) getVariable ["AIC_zeusWaypoint", false] } count _allAI;
+    private _totalAI       = (count _allAI) + _protectedCount;
 
     if (AIC_debug) then {
         diag_log format [
@@ -140,11 +149,11 @@ while {true} do {
             _activeCount, AIC_maxActiveAI,
             count _inRangeLOS, count _inRangeNoLOS,
             count _outOfRange, _protectedCount, _culledCount, _overrideCount,
-            _totalAI, _serverFPS
+            _totalAI, AIC_serverFPS
         ];
     };
 
-    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount, _totalAI, _serverFPS]
+    [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount, _totalAI, AIC_serverFPS]
         call AIC_fnc_broadcastStats;
 
     sleep AIC_checkInterval;

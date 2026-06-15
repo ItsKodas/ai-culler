@@ -1,3 +1,5 @@
+if (!hasInterface) exitWith {};
+
 AIC_clientEnabled    = true;
 AIC_clientSafeRadius = 75;
 AIC_clientDebug      = false;
@@ -14,36 +16,31 @@ AIC_clientSweepTicks = 4;      // clear any sweep in ~this many ticks (primary k
 AIC_clientBudgetMin  = 10;     // slice floor when FPS is collapsing
 AIC_clientBudgetMax  = 40;     // snug spike-guard above the 100-AI target
 
-if (!hasInterface) exitWith {};
+// postInit: player is already initialised — no spawn or sleep needed
+private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");
 
-[] spawn {
-    waitUntil { !isNull player };
-    sleep 5;
+if (_hasAce) then {
+    private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
+    if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
+    // guard against nil (key missing from HashMap) or nonsense values
+    if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
+    AIC_clientRadius = _vd;
+} else {
+    AIC_clientRadius = 2000;
+};
 
-    private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");
+[] call AIC_fnc_clientLoop;
+[] call AIC_fnc_clientZeusHooks;
 
-    private _fnc_readRadius = {
-        if (_hasAce) then {
-            private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
-            if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-            // guard against nil (key missing from HashMap) or nonsense values
-            if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
-            AIC_clientRadius = _vd;
-        } else {
-            AIC_clientRadius = 2000;
-        };
-    };
-
-    call _fnc_readRadius;
-    [] call AIC_fnc_clientLoop;
-
-    // Slow poll: track mid-mission ACE VD changes without touching the hot path
-    if (_hasAce) then {
+// Slow poll: track mid-mission ACE VD changes without touching the hot path
+if (_hasAce) then {
+    [] spawn {
         while {true} do {
             uiSleep 30;
-            call _fnc_readRadius;
+            private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
+            if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
+            if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
+            AIC_clientRadius = _vd;
         };
     };
 };
-
-[] call AIC_fnc_clientZeusHooks;

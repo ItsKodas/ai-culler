@@ -8,11 +8,15 @@ if (isServer) then {
 
     // Keep updating every second, independent of the culler tick, so the
     // reading is not biased by the culler's own processing load.
+    // Send only to active curator clients rather than broadcasting to everyone.
     [] spawn {
         while {true} do {
             sleep 1;
             AIC_serverFPS = round diag_fps;
-            publicVariable "AIC_serverFPS";
+            {
+                private _player = getAssignedCuratorUnit _x;
+                if (!isNull _player) then { AIC_serverFPS publicVariableClient (owner _player) };
+            } forEach allCurators;
         };
     };
 
@@ -27,7 +31,7 @@ if (isServer) then {
             if (_grp getVariable ["AIC_waypointBaseline", -1] < 0) then {
                 _grp setVariable ["AIC_waypointBaseline", count (waypoints _grp)];
             };
-        } forEach (allUnits select { !isPlayer _x && _x isKindOf "Man" });
+        } forEach (allUnits select { !isPlayer _x && _x isKindOf "CAManBase" });
         if (AIC_debug) then { diag_log "[AIC][WP] Baseline snapshot complete"; };
 
         while {true} do {
@@ -54,12 +58,17 @@ if (isServer) then {
                         if (!(_grp getVariable ["AIC_zeusWaypoint", false])) then {
                             if (AIC_debug) then { diag_log format ["[AIC][WP] Zeus waypoint detected on group %1 (cur=%2 base=%3)", _grp, _cur, _base]; };
                             _grp setVariable ["AIC_zeusWaypoint", true, true];
+                            private _enabled = [];
                             {
-                                if (!(_x getVariable ["zeusProtected", false]) &&
+                                if (!(_x getVariable ["AIC_zeusProtected", false]) &&
                                     (_x getVariable ["AIC_disabled", false])) then {
                                     [_x] call AIC_fnc_enableUnit;
+                                    _enabled pushBack _x;
                                 };
                             } forEach (units _grp);
+                            if (_enabled isNotEqualTo []) then {
+                                [_enabled] remoteExec ["AIC_fnc_updateUnitLabel", 0];
+                            };
                         };
                     };
                     // Clear override when:
@@ -74,19 +83,17 @@ if (isServer) then {
                             if (AIC_debug) then { diag_log format ["[AIC][WP] Zeus waypoints cleared on group %1 (cur=%2 base=%3 curWP=%4)", _grp, _cur, _base, _curWP]; };
                             _grp setVariable ["AIC_waypointBaseline", _cur];
                             _grp setVariable ["AIC_zeusWaypoint", false, true];
-                            { [_x] remoteExec ["AIC_fnc_updateUnitLabel", 0]; } forEach (units _grp);
+                            [(units _grp)] remoteExec ["AIC_fnc_updateUnitLabel", 0];
                         };
                     };
                 };
-            } forEach (allUnits select { !isPlayer _x && _x isKindOf "Man" && alive _x });
+            } forEach (allUnits select { !isPlayer _x && _x isKindOf "CAManBase" && alive _x });
         };
     };
 };
 
+// postInit: player is already initialised on interface machines — no spawn or waitUntil needed
 if (hasInterface) then {
-    [] spawn {
-        waitUntil { !isNull player };
-        if (AIC_debug) then { diag_log "[AIC] Interface machine — init Zeus hooks"; };
-        [] call AIC_fnc_initZeusHooks;
-    };
+    if (AIC_debug) then { diag_log "[AIC] Interface machine — init Zeus hooks"; };
+    [] call AIC_fnc_initZeusHooks;
 };
