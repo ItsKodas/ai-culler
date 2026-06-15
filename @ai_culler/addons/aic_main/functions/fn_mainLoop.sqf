@@ -25,15 +25,18 @@ while {true} do {
     private _protectedCount = {
         alive _x &&
         _x isKindOf "CAManBase" &&
+        vehicle _x == _x &&
         !isPlayer _x &&
         (_x getVariable ["AIC_zeusProtected", false]) &&
         (side _x in [west, east, resistance, civilian])
     } count allUnits;
 
-    // Managed pool: living AI infantry, unprotected, all factions
+    // Managed pool: living AI infantry on foot, unprotected, all factions.
+    // vehicle _x == _x excludes crew seated inside vehicles — culling crew breaks the vehicle.
     private _allAI = allUnits select {
         alive _x &&
         _x isKindOf "CAManBase" &&
+        vehicle _x == _x &&
         !isPlayer _x &&
         !(_x getVariable ["AIC_zeusProtected", false]) &&
         (side _x in [west, east, resistance, civilian])

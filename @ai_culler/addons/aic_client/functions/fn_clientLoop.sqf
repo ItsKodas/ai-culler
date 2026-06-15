@@ -52,7 +52,7 @@ AIC_clientPFH = [{
 
     // --- Cheap, every tick: current candidate pool ---
     private _candidates = allUnits select {
-        !isPlayer _x && alive _x && (_x isKindOf "Man") && (_x distance player) < AIC_clientRadius
+        !isPlayer _x && alive _x && (_x isKindOf "CAManBase") && vehicle _x == _x && (_x distance player) < AIC_clientRadius
     };
 
     // --- Every tick: reveal from the COMMITTED set (left pool / closed inside safe radius) ---

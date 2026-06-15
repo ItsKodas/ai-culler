@@ -198,9 +198,9 @@ Under load the renderer backs off automatically, reducing its own contribution t
 
 #### Budgeted LOS sweep
 
-Rather than checking every AI candidate in a single tick, the LOS work is spread across multiple ticks in slices. Each slice processes `ceil(poolSize / AIC_clientSweepTicks)` units (default: targets completion in ~4 ticks). This eliminates single-tick spikes when many AI are in radius — frame cost is capped and predictable regardless of AI count.
+Rather than checking every AI candidate in a single tick, the LOS work is spread across multiple ticks in slices. Each slice processes `ceil(poolSize / AIC_clientSweepTicks)` units (default: targets completion in ~3 ticks). This eliminates single-tick spikes when many AI are in radius — frame cost is capped and predictable regardless of AI count.
 
-If FPS drops below `AIC_clientFpsFloor`, the slice size is throttled down to `AIC_clientBudgetMin` to protect frame time at the cost of slower sweep completion. Both limits are clamped to `AIC_clientBudgetMax` (default 40) as a spike guard.
+If FPS drops below `AIC_clientFpsFloor`, the slice size is throttled down to `AIC_clientBudgetMin` to protect frame time at the cost of slower sweep completion. Both limits are clamped to `AIC_clientBudgetMax` (default 60) as a spike guard.
 
 ### Why this helps
 
@@ -305,6 +305,10 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.3.2
+- Fixed: AI crew seated inside vehicles were incorrectly included in the culling pool — disabling simulation on a crew member can break the vehicle entirely. A `vehicle _x == _x` guard now excludes any unit that is mounted inside a vehicle from both the server culler and the client renderer
+- Fixed: client renderer used `isKindOf "Man"` instead of `CAManBase` for its candidate filter (missed in v3.3.0) — same vehicle crew guard applied at the same time
 
 ### v3.3.1
 - Fixed: `publicVariableClient` was passing the variable's value (a Number) instead of its name as a String — server FPS was never reaching Zeus clients

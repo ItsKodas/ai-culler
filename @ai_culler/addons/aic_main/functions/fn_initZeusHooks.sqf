@@ -56,7 +56,7 @@ if (!hasInterface) exitWith {};
         };
 
         // Batch-refresh name prefixes for all currently flagged units
-        private _labelled = allUnits select { alive _x && _x isKindOf "CAManBase" && !isPlayer _x };
+        private _labelled = allUnits select { alive _x && _x isKindOf "CAManBase" && vehicle _x == _x && !isPlayer _x };
         if (_labelled isNotEqualTo []) then { [_labelled] call AIC_fnc_updateUnitLabel };
 
         // Draw floating 3D labels above protected/culled/overridden units — visible only to this Zeus client
