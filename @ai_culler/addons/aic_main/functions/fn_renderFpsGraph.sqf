@@ -1,6 +1,6 @@
 // AIC_fnc_renderFpsGraph — redraws the server FPS sparkline from AIC_fpsHistory.
-// Called automatically by the AIC_serverFPS PVEH (once per second) and immediately
-// on panel open. Exits silently when the Zeus display or graph panel is not visible.
+// Called by the 1-second FPS refresh loop and immediately on panel open.
+// Exits silently when the Zeus display or graph panel is not visible.
 private _display = findDisplay 312;
 if (isNull _display) exitWith {};
 private _graphCtrl = _display displayCtrl 9253;

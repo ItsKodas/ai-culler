@@ -1,16 +1,5 @@
 if (!hasInterface) exitWith {};
 
-// Ring buffer for server FPS history - registered once; persists across Zeus sessions
-// so the graph retains data even when Zeus is closed between ops.
-if (isNil "AIC_fpsHistory") then {
-    AIC_fpsHistory = [];
-    addPublicVariableEventHandler ["AIC_serverFPS", {
-        AIC_fpsHistory pushBack AIC_serverFPS;
-        if (count AIC_fpsHistory > 300) then { AIC_fpsHistory deleteAt 0 };
-        [] call AIC_fnc_renderFpsGraph;
-    }];
-};
-
 // Status window lifecycle: poll for Zeus display opening and closing
 [] spawn {
     private _drawEH = -1;
@@ -55,7 +44,8 @@ if (isNil "AIC_fpsHistory") then {
             false
         }];
 
-        // 1-second FPS refresh — updates Srv/Clt FPS rows without waiting for the server tick
+        // 1-second FPS refresh - updates Srv/Clt FPS rows and accumulates history for the graph
+        if (isNil "AIC_fpsHistory") then { AIC_fpsHistory = [] };
         [] spawn {
             while { !isNull (findDisplay 312) } do {
                 sleep 1;
@@ -68,6 +58,13 @@ if (isNil "AIC_fpsHistory") then {
                         _srvCtrl ctrlCommit 0;
                     };
                     if (!isNull _cltCtrl) then { _cltCtrl ctrlSetText format ["Clt FPS: %1", round diag_fps]; _cltCtrl ctrlCommit 0; };
+
+                    if (!isNil "AIC_serverFPS") then {
+                        if (isNil "AIC_fpsHistory") then { AIC_fpsHistory = [] };
+                        AIC_fpsHistory pushBack AIC_serverFPS;
+                        if (count AIC_fpsHistory > 300) then { AIC_fpsHistory deleteAt 0 };
+                        [] call AIC_fnc_renderFpsGraph;
+                    };
                 };
             };
         };
