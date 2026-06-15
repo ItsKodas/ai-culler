@@ -15,7 +15,7 @@ if (isServer) then {
             AIC_serverFPS = round diag_fps;
             {
                 private _player = getAssignedCuratorUnit _x;
-                if (!isNull _player) then { AIC_serverFPS publicVariableClient (owner _player) };
+                if (!isNull _player) then { "AIC_serverFPS" publicVariableClient (owner _player) };
             } forEach allCurators;
         };
     };
