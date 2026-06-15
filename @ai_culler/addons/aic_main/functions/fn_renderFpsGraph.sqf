@@ -56,15 +56,13 @@ if ((_topRow - _botRow) < 40) then {
 // Cap at 8 rows max; trim from the bottom
 if ((_topRow - _botRow) > 80) then { _botRow = _topRow - 80 };
 
-// Downsample time axis to 88 display columns (double-wide panel)
+// Sliding window: always show the most recent _maxCols entries.
+// When at capacity, each new sample pushes the oldest off the left edge.
 private _maxCols = 88;
-private _displayData = [];
-if (_n <= _maxCols) then {
-    _displayData = _history;
+private _displayData = if (_n <= _maxCols) then {
+    _history
 } else {
-    for "_i" from 0 to (_maxCols - 1) do {
-        _displayData pushBack (_history select (floor (_i * _n / _maxCols)));
-    };
+    _history select [_n - _maxCols, _maxCols]
 };
 
 // Build bar chart: one row per FPS level, O where fps >= that level
