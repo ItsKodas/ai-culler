@@ -8,7 +8,7 @@ if (isNull _display) exitWith {};
     forEach [9251,9252,9253,9254];
 
 private _gx    = safeZoneX + 0.35;
-private _gw    = 0.38;
+private _gw    = 0.76;
 private _tH    = 0.036;
 private _gH    = 0.155;   // bar chart area height (up to 8 rows)
 private _legH  = 0.022;

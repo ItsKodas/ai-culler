@@ -15,7 +15,7 @@ if (_n == 0) exitWith {
     _graphCtrl ctrlCommit 0;
 };
 
-// Compute stats
+// Compute stats from current history
 private _sum = 0;
 private _maxFPS = 0;
 private _minFPS = 9999;
@@ -33,12 +33,18 @@ if (!isNull _titleCtrl) then {
     _titleCtrl ctrlCommit 0;
 };
 
-// Auto-scale Y axis in steps of 10, clamped to 4-8 rows
-private _topRow = (ceil  (_maxFPS / 10)) * 10;
-private _botRow = (floor (_minFPS / 10)) * 10;
+// Stable Y-axis: tracked globals only ever expand outward so the scale never
+// jumps when old samples drop off the ring buffer end.
+if (isNil "AIC_fpsYMin") then { AIC_fpsYMin = _minFPS };
+if (isNil "AIC_fpsYMax") then { AIC_fpsYMax = _maxFPS };
+AIC_fpsYMin = _minFPS min AIC_fpsYMin;
+AIC_fpsYMax = _maxFPS max AIC_fpsYMax;
+
+private _topRow = (ceil  (AIC_fpsYMax / 10)) * 10;
+private _botRow = (floor (AIC_fpsYMin / 10)) * 10;
 if (_topRow == _botRow) then { _topRow = _botRow + 10 };
 
-// Expand to minimum 4 rows (40 FPS range)
+// Ensure at least 4 rows visible
 if ((_topRow - _botRow) < 40) then {
     private _mid = (floor ((_topRow + _botRow) / 20)) * 10;
     _topRow = _mid + 20;
@@ -50,8 +56,8 @@ if ((_topRow - _botRow) < 40) then {
 // Cap at 8 rows max; trim from the bottom
 if ((_topRow - _botRow) > 80) then { _botRow = _topRow - 80 };
 
-// Downsample time axis to 45 display columns
-private _maxCols = 45;
+// Downsample time axis to 88 display columns (double-wide panel)
+private _maxCols = 88;
 private _displayData = [];
 if (_n <= _maxCols) then {
     _displayData = _history;
