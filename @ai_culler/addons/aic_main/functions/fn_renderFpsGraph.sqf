@@ -68,8 +68,10 @@ while { _row >= _botRow } do {
     if ((count _lbl) < 3) then { _lbl = " " + _lbl };
     if ((count _lbl) < 3) then { _lbl = " " + _lbl };
 
-    // Build the dot string for this row
+    // Build the dot string for this row, right-aligned so data fills right-to-left.
+    // Pad the left side with spaces until the array reaches full width (88 cols).
     private _rowStr = "";
+    for "_p" from 1 to (88 - _n) do { _rowStr = _rowStr + " "; };
     { _rowStr = _rowStr + (if (_x >= _row) then { "O" } else { " " }); } forEach _history;
 
     _text = _text + format [
