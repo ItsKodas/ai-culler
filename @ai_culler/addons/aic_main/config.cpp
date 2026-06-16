@@ -18,8 +18,9 @@ class CfgFunctions {
         tag = "AIC";
         class Main {
             file = "aic_main\functions";
-            class preInit      { preInit  = 1; };
-            class postInit     { postInit = 1; };
+            class preInit           { preInit  = 1; };
+            class postInit          { postInit = 1; };
+            class registerSettings  {};
             class mainLoop         {};
             class enableUnit       {};
             class disableUnit      {};

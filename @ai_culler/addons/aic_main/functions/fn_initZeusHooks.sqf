@@ -75,13 +75,14 @@ if (!hasInterface) exitWith {};
 
         // Draw floating 3D labels above protected/culled/overridden units — visible only to this Zeus client
         _drawEH = addMissionEventHandler ["Draw3D", {
+            if (!AIC_show3DLabels) exitWith {};
             private _camPos = positionCameraToWorld [0,0,0];
             {
                 private _prot = _x getVariable ["AIC_zeusProtected", false];
                 private _cull = _x getVariable ["AIC_disabled",  false];
                 private _over = !_cull && !_prot && (group _x) getVariable ["AIC_zeusWaypoint", false];
                 if (_prot || _cull || _over) then {
-                    if (_camPos distance _x < 800) then {
+                    if (_camPos distance _x < AIC_labelDist) then {
                         private _color = [1.0, 0.55, 0.0, 1.0];
                         private _label = "[Culled]";
                         if (_over) then { _color = [0.0, 0.7, 1.0, 1.0]; _label = "[Override]"; };

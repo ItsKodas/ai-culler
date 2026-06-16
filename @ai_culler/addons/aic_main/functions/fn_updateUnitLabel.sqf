@@ -16,9 +16,12 @@ if (!hasInterface || { isNull (getAssignedCuratorLogic player) }) exitWith {};
         _unit setVariable ["AIC_origName", _origName];
     };
 
+    // When labels are disabled restore the plain name; prefix is always empty.
     private _prefix = "";
-    if (_culled)    then { _prefix = "[Culled] "; };
-    if (_override)  then { _prefix = "[Override] "; };
-    if (_protected) then { _prefix = "[Protected] "; };
+    if (AIC_showLabels) then {
+        if (_culled)    then { _prefix = "[Culled] " };
+        if (_override)  then { _prefix = "[Override] " };
+        if (_protected) then { _prefix = "[Protected] " };
+    };
     _unit setName (_prefix + _origName);
 } forEach _units;
