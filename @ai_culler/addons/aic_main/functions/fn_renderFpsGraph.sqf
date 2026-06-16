@@ -75,7 +75,7 @@ while { _row >= _botRow } do {
     { _rowStr = _rowStr + (if (_x >= _row) then { "O" } else { " " }); } forEach _history;
 
     _text = _text + format [
-        "<t font='LucidaConsoleB' size='0.7' color='#666666'>%1|</t><t font='LucidaConsoleB' size='0.7' color='#44ff88'>%2</t><br/>",
+        "<t font='LucidaConsoleB' size='0.55' color='#666666'>%1|</t><t font='LucidaConsoleB' size='0.55' color='#44ff88'>%2</t><br/>",
         _lbl,
         _rowStr
     ];
