@@ -44,7 +44,9 @@ if (!hasInterface) exitWith {};
             false
         }];
 
-        // 1-second FPS refresh - updates Srv/Clt FPS rows and accumulates history for the graph
+        // 1-second FPS refresh - updates Srv/Clt FPS rows and feeds the FPS graph.
+        // History array length == graph column count; oldest entry is dropped from
+        // the front each tick once full, so the array IS the display data directly.
         if (isNil "AIC_fpsHistory") then { AIC_fpsHistory = [] };
         [] spawn {
             while { !isNull (findDisplay 312) } do {
@@ -61,8 +63,8 @@ if (!hasInterface) exitWith {};
 
                     if (!isNil "AIC_serverFPS") then {
                         if (isNil "AIC_fpsHistory") then { AIC_fpsHistory = [] };
+                        if (count AIC_fpsHistory >= 88) then { AIC_fpsHistory deleteAt 0 };
                         AIC_fpsHistory pushBack AIC_serverFPS;
-                        if (count AIC_fpsHistory > 300) then { AIC_fpsHistory deleteAt 0 };
                         [] call AIC_fnc_renderFpsGraph;
                     };
                 };

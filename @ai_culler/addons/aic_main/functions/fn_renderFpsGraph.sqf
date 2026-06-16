@@ -56,14 +56,8 @@ if ((_topRow - _botRow) < 40) then {
 // Cap at 8 rows max; trim from the bottom
 if ((_topRow - _botRow) > 80) then { _botRow = _topRow - 80 };
 
-// Sliding window: always show the most recent _maxCols entries.
-// When at capacity, each new sample pushes the oldest off the left edge.
-private _maxCols = 88;
-private _displayData = if (_n <= _maxCols) then {
-    _history
-} else {
-    _history select [_n - _maxCols, _maxCols]
-};
+// Array length is capped at 88 by the accumulation loop, so _history IS the
+// display data — no downsampling or windowing needed.
 
 // Build bar chart: one row per FPS level, O where fps >= that level
 private _text = "";
@@ -76,7 +70,7 @@ while { _row >= _botRow } do {
 
     // Build the dot string for this row
     private _rowStr = "";
-    { _rowStr = _rowStr + (if (_x >= _row) then { "O" } else { " " }); } forEach _displayData;
+    { _rowStr = _rowStr + (if (_x >= _row) then { "O" } else { " " }); } forEach _history;
 
     _text = _text + format [
         "<t font='LucidaConsoleB' size='0.7' color='#666666'>%1|</t><t font='LucidaConsoleB' size='0.7' color='#44ff88'>%2</t><br/>",
