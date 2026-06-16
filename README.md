@@ -58,7 +58,7 @@ Open Zeus → click **Settings** in the AIC status window to adjust values live.
 
 | Field | Variable | Default |
 |---|---|---|
-| Max AI | `AIC_maxActiveAI` | 200 |
+| Max AI | `AIC_maxActiveAI` | 150 |
 | Dist BLUFOR | `AIC_distBlufor` | 2000m |
 | Dist OPFOR | `AIC_distOpfor` | 2000m |
 | Dist Indep | `AIC_distIndependent` | 2000m |
@@ -75,7 +75,7 @@ Open **Configure → Addon Options → AI Culler** before launching a mission. A
 | Setting | Default | Description |
 |---|---|---|
 | Enable Culler on Start | true | Whether the culler is active when the mission begins |
-| Max Active AI | 200 | Hard cap on simultaneously active AI |
+| Max Active AI | 150 | Hard cap on simultaneously active AI |
 | BLUFOR Cull Distance | 2000m | Cull distance for BLUFOR (west) |
 | OPFOR Cull Distance | 2000m | Cull distance for OPFOR (east) |
 | Independent Cull Distance | 2000m | Cull distance for Independent |
@@ -91,7 +91,7 @@ Defaults are set in `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and ap
 
 | Variable | Default | Description |
 |---|---|---|
-| `AIC_maxActiveAI` | 200 | Hard cap on simultaneously active AI |
+| `AIC_maxActiveAI` | 150 | Hard cap on simultaneously active AI |
 | `AIC_distBlufor` | 2000m | Cull distance for BLUFOR (west) |
 | `AIC_distOpfor` | 2000m | Cull distance for OPFOR (east) |
 | `AIC_distIndependent` | 2000m | Cull distance for Independent |

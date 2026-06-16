@@ -4,7 +4,7 @@
 
 // Hard-coded defaults — only applied for variables still undefined after the
 // CBA registration above (i.e. CBA is absent, or a variable was not registered).
-if (isNil "AIC_maxActiveAI")      then { AIC_maxActiveAI     = 200   };
+if (isNil "AIC_maxActiveAI")      then { AIC_maxActiveAI     = 150   };
 if (isNil "AIC_distBlufor")       then { AIC_distBlufor      = 2000  };
 if (isNil "AIC_distOpfor")        then { AIC_distOpfor       = 2000  };
 if (isNil "AIC_distIndependent")  then { AIC_distIndependent = 2000  };

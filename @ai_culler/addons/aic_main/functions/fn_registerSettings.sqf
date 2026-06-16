@@ -15,7 +15,7 @@ if (isNil "CBA_fnc_addSetting") exitWith {};
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_maxActiveAI", "SLIDER", [200, 10, 500, 0],
+    "AIC_maxActiveAI", "SLIDER", [150, 10, 500, 0],
     ["AI Culler", "Max Active AI"],
     "Maximum number of AI units the culler allows to be active simultaneously.",
     true, {}
