@@ -1,8 +1,9 @@
 if (!hasInterface) exitWith {};
 
-AIC_clientEnabled    = true;
-AIC_clientSafeRadius = 75;
-AIC_clientDebug      = false;
+// Only apply hard-coded defaults if CBA hasn't already populated these from the saved profile
+if (isNil "AIC_clientEnabled")    then { AIC_clientEnabled    = true  };
+if (isNil "AIC_clientSafeRadius") then { AIC_clientSafeRadius = 75    };
+if (isNil "AIC_clientDebug")      then { AIC_clientDebug      = false };
 AIC_clientHidden     = [];
 
 // --- Adaptive cadence (FPS -> interval ramp) ---
@@ -22,25 +23,26 @@ private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");
 if (_hasAce) then {
     private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
     if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-    // guard against nil (key missing from HashMap) or nonsense values
-    if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
+    if (isNil "_vd" || { _vd <= 0 }) then { _vd = viewDistance };
     AIC_clientRadius = _vd;
 } else {
-    AIC_clientRadius = 2000;
+    AIC_clientRadius = viewDistance;
 };
 
 [] call AIC_fnc_clientLoop;
-[] call AIC_fnc_clientZeusHooks;
 
-// Slow poll: track mid-mission ACE VD changes without touching the hot path
-if (_hasAce) then {
-    [] spawn {
-        while {true} do {
-            uiSleep 30;
+// Slow poll: track mid-mission view distance changes without touching the hot path
+[_hasAce] spawn {
+    params ["_hasAce"];
+    while {true} do {
+        uiSleep 30;
+        if (_hasAce) then {
             private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
             if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-            if (isNil "_vd" || { _vd <= 0 }) then { _vd = 2000 };
+            if (isNil "_vd" || { _vd <= 0 }) then { _vd = viewDistance };
             AIC_clientRadius = _vd;
+        } else {
+            AIC_clientRadius = viewDistance;
         };
     };
 };

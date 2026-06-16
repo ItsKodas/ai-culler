@@ -20,8 +20,6 @@ class CfgFunctions {
             file = "aic_client\functions";
             class clientPreInit    { postInit = 1; };
             class clientLoop       {};
-            class clientZeusHooks  {};
-            class createClientPanel {};
         };
     };
 };

@@ -1,3 +1,9 @@
+// Register CBA settings after CBA XEH PreInit has finished so they survive
+// CBA's internal registry reset at the start of its XEH phase.
+diag_log "[AIC] postInit: registering settings";
+[] call AIC_fnc_registerSettings;
+diag_log "[AIC] postInit: settings registered";
+
 if (isServer) then {
     if (AIC_debug) then { diag_log "[AIC] Server — starting culler loop"; };
     [] spawn AIC_fnc_mainLoop;

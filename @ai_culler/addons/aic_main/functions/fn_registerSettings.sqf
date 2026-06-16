@@ -1,102 +1,170 @@
 // AIC_fnc_registerSettings — registers all CBA Addon Options settings.
-// Called from fn_preInit so variables are set before any other code reads them.
-// Exits silently if CBA_A3 is not loaded; fn_preInit then applies hard-coded defaults.
-if (isNil "CBA_fnc_addSetting") exitWith {};
+// Called from fn_preInit. Exits silently if CBA_A3 is not loaded.
+// Parameter order: [name, type, [title, tooltip], category, valueInfo, isGlobal, script]
+diag_log "[AIC] fn_registerSettings: running";
+diag_log format ["[AIC] CBA_fnc_addSetting is nil: %1", isNil "CBA_fnc_addSetting"];
+if (isNil "CBA_fnc_addSetting") exitWith { diag_log "[AIC] fn_registerSettings: CBA not found, exiting" };
 
-// ── SERVER SETTINGS ────────────────────────────────────────────────────────
-// isGlobal = true: server's Addon Options value is broadcast to all clients.
-// Zeus runtime adjustments (Apply button) still override these mid-mission.
+// ── SERVER SETTINGS (isGlobal = 1: server value broadcast to all clients) ──
 
 [
-    "AIC_cullerEnabled", "CHECKBOX", true,
-    ["AI Culler", "Enable Culler on Start"],
-    "Start the mission with the AI culling system active.",
-    true, {}
+    "AIC_cullerEnabled",
+    "CHECKBOX",
+    ["Enable Culler on Start", "Start the mission with the AI culling system active."],
+    "AI Culler",
+    true,
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_maxActiveAI", "SLIDER", [150, 10, 500, 0],
-    ["AI Culler", "Max Active AI"],
-    "Maximum number of AI units the culler allows to be active simultaneously.",
-    true, {}
+    "AIC_maxActiveAI",
+    "SLIDER",
+    ["Max Active AI", "Maximum number of AI units the culler allows to be active simultaneously."],
+    "AI Culler",
+    [10, 500, 150, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_distBlufor", "SLIDER", [2000, 100, 8000, 0],
-    ["AI Culler", "BLUFOR Cull Distance (m)"],
-    "Distance beyond which BLUFOR AI infantry are culled.",
-    true, {}
+    "AIC_distBlufor",
+    "SLIDER",
+    ["BLUFOR Cull Distance (m)", "Distance beyond which BLUFOR AI infantry are culled."],
+    "AI Culler",
+    [100, 8000, 2000, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_distOpfor", "SLIDER", [2000, 100, 8000, 0],
-    ["AI Culler", "OPFOR Cull Distance (m)"],
-    "Distance beyond which OPFOR AI infantry are culled.",
-    true, {}
+    "AIC_distOpfor",
+    "SLIDER",
+    ["OPFOR Cull Distance (m)", "Distance beyond which OPFOR AI infantry are culled."],
+    "AI Culler",
+    [100, 8000, 2000, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_distIndependent", "SLIDER", [2000, 100, 8000, 0],
-    ["AI Culler", "Independent Cull Distance (m)"],
-    "Distance beyond which Independent AI infantry are culled.",
-    true, {}
+    "AIC_distIndependent",
+    "SLIDER",
+    ["Independent Cull Distance (m)", "Distance beyond which Independent AI infantry are culled."],
+    "AI Culler",
+    [100, 8000, 2000, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_distCivilian", "SLIDER", [500, 0, 3000, 0],
-    ["AI Culler", "Civilian Cull Distance (m)"],
-    "Distance beyond which Civilian AI are culled. Set to 0 to always cull civilians.",
-    true, {}
+    "AIC_distCivilian",
+    "SLIDER",
+    ["Civilian Cull Distance (m)", "Distance beyond which Civilian AI are culled. Set to 0 to always cull."],
+    "AI Culler",
+    [0, 3000, 500, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_checkInterval", "SLIDER", [5, 1, 30, 0],
-    ["AI Culler", "Check Interval (s)"],
-    "How often (in seconds) the culler re-evaluates all AI units.",
-    true, {}
+    "AIC_checkInterval",
+    "SLIDER",
+    ["Check Interval (s)", "How often the culler re-evaluates all AI units."],
+    "AI Culler",
+    [1, 30, 5, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_minActiveRadius", "SLIDER", [200, 25, 1000, 0],
-    ["AI Culler", "Min Active Radius (m)"],
-    "AI within this distance of any player are always active, skipping the LOS check.",
-    true, {}
+    "AIC_minActiveRadius",
+    "SLIDER",
+    ["Min Active Radius (m)", "AI within this distance of any player are always active, skipping the LOS check."],
+    "AI Culler",
+    [25, 1000, 200, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_combatRadius", "SLIDER", [400, 50, 1500, 0],
-    ["AI Culler", "Combat Detection Radius (m)"],
-    "Radius used to detect whether AI units are in active combat with each other.",
-    true, {}
+    "AIC_combatRadius",
+    "SLIDER",
+    ["Combat Detection Radius (m)", "Radius used to detect active combat between AI units."],
+    "AI Culler",
+    [50, 1500, 400, 0],
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_debug", "CHECKBOX", false,
-    ["AI Culler", "Debug Logging"],
-    "Write culler diagnostics to the RPT log each tick.",
-    true, {}
+    "AIC_debug",
+    "CHECKBOX",
+    ["Debug Logging", "Write culler diagnostics to the RPT log each tick."],
+    "AI Culler",
+    false,
+    1,
+    {}
 ] call CBA_fnc_addSetting;
 
-// ── CLIENT RENDERER SETTINGS ───────────────────────────────────────────────
-// isGlobal = false: each client sets their own display preferences.
+// ── CLIENT SETTINGS (isGlobal = 0: per-client display preferences) ──────────
 
 [
-    "AIC_showLabels", "CHECKBOX", true,
-    ["AI Culler - Client", "Show Unit Name Labels"],
-    "Prefix unit names with [Culled] / [Protected] / [Override] when you are Zeus.",
-    false, {}
-] call CBA_fnc_addSetting;
-
-[
-    "AIC_show3DLabels", "CHECKBOX", true,
-    ["AI Culler - Client", "Show 3D Floating Labels"],
-    "Draw floating 3D text labels above culled/protected/override units in Zeus view.",
-    false, {}
+    "AIC_clientEnabled",
+    "CHECKBOX",
+    ["Enable Client Renderer", "Hide AI units that are behind terrain from your view. Reduces GPU load."],
+    "AI Culler - Client",
+    true,
+    0,
+    {}
 ] call CBA_fnc_addSetting;
 
 [
-    "AIC_labelDist", "SLIDER", [800, 100, 3000, 0],
-    ["AI Culler - Client", "3D Label Draw Distance (m)"],
-    "Maximum distance from your camera at which 3D labels are rendered.",
-    false, {}
+    "AIC_showLabels",
+    "CHECKBOX",
+    ["Show Unit Name Labels", "Prefix unit names with [Culled] / [Protected] / [Override] when you are Zeus."],
+    "AI Culler - Client",
+    true,
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
+    "AIC_show3DLabels",
+    "CHECKBOX",
+    ["Show 3D Floating Labels", "Draw floating 3D labels above culled/protected/override units in Zeus view."],
+    "AI Culler - Client",
+    true,
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
+    "AIC_labelDist",
+    "SLIDER",
+    ["3D Label Draw Distance (m)", "Maximum distance from your Zeus camera at which 3D labels are rendered."],
+    "AI Culler - Client",
+    [100, 3000, 800, 0],
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
+    "AIC_clientSafeRadius",
+    "SLIDER",
+    ["Safe Radius (m)", "AI within this distance are always visible regardless of line of sight."],
+    "AI Culler - Client",
+    [0, 500, 75, 0],
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
+    "AIC_clientDebug",
+    "CHECKBOX",
+    ["Debug HUD", "Show the client renderer debug overlay on all clients."],
+    "AI Culler - Client",
+    false,
+    1,
+    {}
 ] call CBA_fnc_addSetting;

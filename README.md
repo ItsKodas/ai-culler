@@ -144,22 +144,7 @@ Click **▲/▼** to collapse or expand. Press **Backspace** to hide/show the pa
 
 - **Disable Culler / Enable Culler** — pauses and resumes culling. All previously culled AI are re-enabled when disabled. Stats continue to update.
 - **Settings** — expands an inline panel to adjust all config values live. Click **Apply** to push changes to the server.
-- **FPS Graph** — opens a floating bar chart showing server FPS over the last 90 seconds. Y-axis auto-scales to the observed range; the title bar shows live average, minimum, and maximum. Updates every second alongside the FPS display.
-
-### Client Renderer panel
-
-Sits to the right of the main AIC panel. Controls the client-side model hider for all connected players simultaneously.
-
-| Field | Variable | Description |
-|---|---|---|
-| Client Renderer | `AIC_clientEnabled` | Toggle the renderer on or off |
-| Radius | `AIC_clientRadius` | Max distance to check AI for occlusion — auto-set from ACE view distance if ACE3 is loaded, otherwise 2000m. Can be overridden here |
-| Safe Radius | `AIC_clientSafeRadius` | AI within this distance are always rendered to prevent pop-in |
-| Debug HUD | `AIC_clientDebug` | Enables the on-screen overlay showing live renderer stats |
-
-Clicking **Apply** broadcasts all values to every connected client via `publicVariable`.
-
-Press **Backspace** to hide/show the Client Renderer panel alongside the main panel.
+- **FPS Graph** — opens a floating sparkline showing server FPS over the last 88 seconds. Characters scale from `_` (lowest) to `#` (highest) relative to the session peak. The title bar shows current, average, minimum, and maximum FPS. Updates every second alongside the FPS display.
 
 ### Zeus waypoint Override
 
@@ -228,7 +213,7 @@ This is architecturally different from mods like A3PE (Arma 3 Performance Extens
 
 ### Debug HUD
 
-When **Debug HUD** is enabled from the Zeus Client Renderer panel, a small yellow overlay appears in the bottom-left corner of every client's screen:
+When **Debug HUD** is enabled from Addon Options (admin only), a small yellow overlay appears in the bottom-left corner of the screen:
 
 ```
 CR:47v 112h [ADS] | fps45 int0.20 bud25 | sweep25/100
@@ -247,25 +232,26 @@ This updates every renderer tick and disappears automatically when the renderer 
 
 ### Client renderer Addon Options (requires CBA_A3)
 
-Open **Configure → Addon Options → AI Culler - Client** to set per-client display preferences. These are not server-enforced — each player sets their own.
+Open **Configure → Addon Options → AI Culler - Client** to set per-client preferences. These are not server-enforced — each player sets their own.
 
 | Setting | Default | Description |
 |---|---|---|
+| Enable Client Renderer | true | Toggle the LOS hider on or off |
 | Show Unit Name Labels | true | Prefix unit names with `[Culled]` / `[Protected]` / `[Override]` when you are Zeus |
 | Show 3D Floating Labels | true | Draw floating 3D text above culled/protected/override units in Zeus view |
 | 3D Label Draw Distance | 800m | Maximum camera distance at which 3D labels are rendered |
+| Safe Radius | 75m | AI within this distance are always rendered regardless of LOS |
 
-### Default settings
+**Debug HUD** is a server-enforced setting — it appears in the **AI Culler** (Server) tab, not the Client tab. When enabled by the server admin it activates the debug overlay on all connected clients simultaneously.
 
-Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild the PBO to change defaults:
+### Radius auto-sync
 
-| Variable | Default | Description |
-|---|---|---|
-| `AIC_clientEnabled` | true | Enable the renderer on load |
-| `AIC_clientSafeRadius` | 75m | Always-render radius around the player |
-| `AIC_clientDebug` | false | Show debug HUD on load |
+`AIC_clientRadius` is not a static default. At mission start it is read from the player's view distance and kept in sync every 30 seconds to track mid-mission changes:
 
-**Radius** — `AIC_clientRadius` is no longer a static default. If ACE3 is loaded it is read from `ace_viewdistance_viewDistanceOnFoot` at mission start and kept in sync every 30 seconds. Without ACE3 it falls back to 2000m. It can still be overridden live from the Zeus Client Renderer panel.
+- **With ACE3** — reads `ace_viewdistance_viewDistanceOnFoot`; falls back to Arma's native `viewDistance` if that variable is not set
+- **Without ACE3** — reads Arma's native `viewDistance` directly
+
+This means the renderer automatically checks AI only as far as the player can actually see, with no manual radius configuration needed.
 
 **Adaptive cadence knobs:**
 
@@ -326,14 +312,21 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
         ├── config.cpp
         └── functions/
             ├── fn_clientPreInit.sqf       # Defaults + initialises renderer at mission start
-            ├── fn_clientLoop.sqf          # Per-tick LOS check and hideObject calls
-            ├── fn_clientZeusHooks.sqf     # Client Renderer panel lifecycle in Zeus
-            └── fn_createClientPanel.sqf   # Builds the Zeus Client Renderer UI controls
+            └── fn_clientLoop.sqf          # Per-tick LOS check and hideObject calls
 ```
 
 ---
 
 ## Changelog
+
+### v3.5.0
+- Removed Zeus Client Renderer panel — all client renderer settings are now managed via CBA Addon Options
+- Added **Enable Client Renderer** and **Safe Radius** to the **AI Culler - Client** addon options page (per-player)
+- Added **Debug HUD** as a server-enforced setting under the **AI Culler** (Server) tab — enables the renderer overlay on all connected clients simultaneously when toggled by the server admin
+- `AIC_clientRadius` now falls back to Arma's native `viewDistance` when ACE3 is not loaded (was hardcoded 2000m) and syncs every 30 seconds to track mid-mission changes — no ACE3 required for automatic radius tracking
+- ACE3 branch: final fallback within the ACE path also uses `viewDistance` instead of 2000m, covering the edge case where ACE3 is loaded but its view distance variable is not yet set
+- Fixed: CBA saved settings were being overwritten on load — `fn_clientPreInit.sqf` now uses `isNil` guards so hard-coded defaults only apply when CBA has not already populated the variable from the saved profile
+- Fixed: `_hasAce` variable was not accessible inside the view distance poll thread — passed as a spawn parameter to keep scope clean
 
 ### v3.4.0
 - Added CBA Addon Options integration — server settings (max AI, cull distances, interval, combat radius, debug) now appear under **Configure → Addon Options → AI Culler** and are applied automatically at mission start without editing any files. Server values are broadcast to all clients via CBA's `isGlobal` mechanism
