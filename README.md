@@ -68,9 +68,26 @@ Open Zeus → click **Settings** in the AIC status window to adjust values live.
 | Combat Rad | `AIC_combatRadius` | 400m |
 | Debug | `AIC_debug` | OFF |
 
-#### Pre-op (edit defaults)
+#### Pre-op (Addon Options — requires CBA_A3)
 
-Edit `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and rebuild the PBO:
+Open **Configure → Addon Options → AI Culler** before launching a mission. All values are saved per-user and applied automatically at mission start. The server's values are broadcast to all clients when `isGlobal` settings are used.
+
+| Setting | Default | Description |
+|---|---|---|
+| Enable Culler on Start | true | Whether the culler is active when the mission begins |
+| Max Active AI | 200 | Hard cap on simultaneously active AI |
+| BLUFOR Cull Distance | 2000m | Cull distance for BLUFOR (west) |
+| OPFOR Cull Distance | 2000m | Cull distance for OPFOR (east) |
+| Independent Cull Distance | 2000m | Cull distance for Independent |
+| Civilian Cull Distance | 500m | Cull distance for Civilians |
+| Check Interval | 5s | How often the culler runs — also controls load spreading (see below) |
+| Min Active Radius | 200m | Units within this radius are always active (no LOS check) |
+| Combat Detection Radius | 400m | Radius used to detect AI vs AI combat engagement |
+| Debug Logging | false | RPT logging — enable for diagnostics only |
+
+#### Pre-op (without CBA_A3)
+
+Defaults are set in `@ai_culler/addons/aic_main/functions/fn_preInit.sqf` and applied if CBA_A3 is not loaded. Edit and rebuild the PBO to change them.
 
 | Variable | Default | Description |
 |---|---|---|
@@ -127,6 +144,7 @@ Click **▲/▼** to collapse or expand. Press **Backspace** to hide/show the pa
 
 - **Disable Culler / Enable Culler** — pauses and resumes culling. All previously culled AI are re-enabled when disabled. Stats continue to update.
 - **Settings** — expands an inline panel to adjust all config values live. Click **Apply** to push changes to the server.
+- **FPS Graph** — opens a floating bar chart showing server FPS over the last 90 seconds. Y-axis auto-scales to the observed range; the title bar shows live average, minimum, and maximum. Updates every second alongside the FPS display.
 
 ### Client Renderer panel
 
@@ -155,7 +173,7 @@ Units in proximity to enemy AI (within `AIC_combatRadius`) are activated regardl
 
 ### 3D floating labels
 
-While Zeus is open, a floating label is drawn above each managed unit visible within 800m of the Zeus camera:
+While Zeus is open, a floating label is drawn above each managed unit within `AIC_labelDist` of the Zeus camera (default 800m, configurable in Addon Options):
 
 | Label | Colour | Meaning |
 |---|---|---|
@@ -227,6 +245,16 @@ CR:47v 112h [ADS] | fps45 int0.20 bud25 | sweep25/100
 
 This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
 
+### Client renderer Addon Options (requires CBA_A3)
+
+Open **Configure → Addon Options → AI Culler - Client** to set per-client display preferences. These are not server-enforced — each player sets their own.
+
+| Setting | Default | Description |
+|---|---|---|
+| Show Unit Name Labels | true | Prefix unit names with `[Culled]` / `[Protected]` / `[Override]` when you are Zeus |
+| Show 3D Floating Labels | true | Draw floating 3D text above culled/protected/override units in Zeus view |
+| 3D Label Draw Distance | 800m | Maximum camera distance at which 3D labels are rendered |
+
 ### Default settings
 
 Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild the PBO to change defaults:
@@ -260,7 +288,7 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 
 ## Compatibility
 
-- ✅ CBA_A3 (required by `aic_client`)
+- ✅ CBA_A3 (required by `aic_client`; optional for `aic_main` — enables Addon Options integration)
 - ✅ LAMBS Danger (AI behaviour state preserved on enable/disable — no longer overwritten)
 - ✅ Headless Clients
 - ✅ Civilian Presence Module
@@ -279,7 +307,8 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
     ├── aic_main/                          # Server-side culler + Zeus UI
     │   ├── config.cpp
     │   └── functions/
-    │       ├── fn_preInit.sqf             # Settings — edit to tune defaults
+    │       ├── fn_preInit.sqf             # Settings — applies CBA values or hard-coded defaults
+    │       ├── fn_registerSettings.sqf    # CBA Addon Options registration (no-op without CBA_A3)
     │       ├── fn_postInit.sqf            # Server loop + Zeus hook branching
     │       ├── fn_mainLoop.sqf            # Main culler loop (runs on server each tick)
     │       ├── fn_getCullDist.sqf         # Returns per-faction cull distance
@@ -305,6 +334,12 @@ Edit `@ai_culler/addons/aic_client/functions/fn_clientPreInit.sqf` and rebuild t
 ---
 
 ## Changelog
+
+### v3.4.0
+- Added CBA Addon Options integration — server settings (max AI, cull distances, interval, combat radius, debug) now appear under **Configure → Addon Options → AI Culler** and are applied automatically at mission start without editing any files. Server values are broadcast to all clients via CBA's `isGlobal` mechanism
+- Added client renderer Addon Options page (**AI Culler - Client**) — each player can independently toggle unit name labels, 3D floating labels, and set their own 3D label draw distance
+- The mod remains fully standalone-compatible: if CBA_A3 is not loaded, `fn_registerSettings` exits silently and `fn_preInit` falls back to hard-coded defaults as before
+- Added Zeus FPS Graph panel — click **FPS Graph** in the status window to open a floating bar chart showing server FPS over the last 90 seconds. Y-axis auto-scales to the observed range and stabilizes when the sliding window is full. Title bar shows live average, min, and max
 
 ### v3.3.2
 - Fixed: AI crew seated inside vehicles were incorrectly included in the culling pool — disabling simulation on a crew member can break the vehicle entirely. A `vehicle _x == _x` guard now excludes any unit that is mounted inside a vehicle from both the server culler and the client renderer
