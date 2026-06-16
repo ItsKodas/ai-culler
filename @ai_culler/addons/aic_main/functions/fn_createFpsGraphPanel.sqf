@@ -26,7 +26,7 @@ _bg ctrlCommit 0;
 // Title bar
 private _titleCtrl = _display ctrlCreate ["RscText", 9252];
 _titleCtrl ctrlSetPosition [_gx + 0.005, _gy + 0.003, _gw - 0.01, _tH - 0.006];
-_titleCtrl ctrlSetText "Server FPS - Last 5 min";
+_titleCtrl ctrlSetText "Server FPS - Last 88s";
 _titleCtrl ctrlSetBackgroundColor [0.12, 0.12, 0.12, 1];
 _titleCtrl ctrlShow false;
 _titleCtrl ctrlCommit 0;
@@ -41,7 +41,7 @@ _graphCtrl ctrlCommit 0;
 // Legend: colour key left, time axis right
 private _legendCtrl = _display ctrlCreate ["RscText", 9254];
 _legendCtrl ctrlSetPosition [_gx + 0.005, _gy + _tH + _pad + _gH + _pad, _gw - 0.01, _legH];
-_legendCtrl ctrlSetText "  green >= 40fps   yellow >= 25fps   red < 25fps           older <----> newer";
+_legendCtrl ctrlSetText "  _ low  . . . ~ + s I # high   (scaled to session peak)           older <----> newer";
 _legendCtrl ctrlSetTextColor [0.55, 0.55, 0.55, 1];
 _legendCtrl ctrlShow false;
 _legendCtrl ctrlCommit 0;

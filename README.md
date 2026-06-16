@@ -144,7 +144,7 @@ Click **▲/▼** to collapse or expand. Press **Backspace** to hide/show the pa
 
 - **Disable Culler / Enable Culler** — pauses and resumes culling. All previously culled AI are re-enabled when disabled. Stats continue to update.
 - **Settings** — expands an inline panel to adjust all config values live. Click **Apply** to push changes to the server.
-- **FPS Graph** — opens a floating sparkline showing server FPS over the last 88 seconds. Characters scale from `_` (lowest) to `#` (highest) relative to the session peak. The title bar shows current, average, minimum, and maximum FPS. Updates every second alongside the FPS display.
+- **FPS Graph** — opens a floating sparkline showing server FPS over the last 88 seconds. All characters are rendered in the same green; height scales from `_` (lowest) to `#` (highest) relative to the session peak FPS. The title bar shows current, average, minimum, and maximum FPS. Updates every second alongside the FPS display.
 
 ### Zeus waypoint Override
 
@@ -242,7 +242,7 @@ Open **Configure → Addon Options → AI Culler - Client** to set per-client pr
 | 3D Label Draw Distance | 800m | Maximum camera distance at which 3D labels are rendered |
 | Safe Radius | 75m | AI within this distance are always rendered regardless of LOS |
 
-**Debug HUD** is a server-enforced setting — it appears in the **AI Culler** (Server) tab, not the Client tab. When enabled by the server admin it activates the debug overlay on all connected clients simultaneously.
+**Debug HUD** (`AIC_clientDebug`) is server-enforced (`isGlobal = 1`) — the server admin controls it and the value is broadcast to all clients. When enabled it activates the renderer overlay on every connected player simultaneously. It is grouped under the **AI Culler - Client** category but only editable from the server side.
 
 ### Radius auto-sync
 
