@@ -22,6 +22,7 @@ class CfgFunctions {
             class postInit          { postInit = 1; };
             class registerSettings  {};
             class mainLoop         {};
+            class waypointMonitor  {};
             class enableUnit       {};
             class disableUnit      {};
             class getCullDist      {};
