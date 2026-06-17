@@ -272,6 +272,21 @@ This means the renderer automatically checks AI only as far as the player can ac
 
 ---
 
+## Scripting API
+
+Four functions are available for mission makers and mod authors. All are registered under the `AIC` tag and can be called from any machine.
+
+| Function | Description |
+|---|---|
+| `[unit] call AIC_fnc_protect` | Permanently exclude a unit from culling. Auto-forwards to server from clients. |
+| `[unit] call AIC_fnc_unprotect` | Return a protected unit to the normal culling pool. Auto-forwards to server from clients. |
+| `[unit] call AIC_fnc_isCulled` | Returns `true` if the unit is currently culled (simulation disabled). |
+| `[] call AIC_fnc_getStats` | Returns the last tick's statistics as a HashMap (keys: `active`, `los`, `noLos`, `culled`, `protected`, `override`, `total`, `serverFps`). |
+
+See [docs/API.md](docs/API.md) for full parameter documentation and examples.
+
+---
+
 ## Compatibility
 
 - ✅ CBA_A3 (required by `aic_client`; optional for `aic_main` — enables Addon Options integration)
@@ -303,7 +318,12 @@ This means the renderer automatically checks AI only as far as the player can ac
     │       ├── fn_broadcastStats.sqf      # Sends stats to Zeus clients each tick
     │       ├── fn_updateStatusWindow.sqf  # Updates stat rows in the Zeus UI
     │       ├── fn_updateUnitLabel.sqf     # Updates the name prefix shown in Zeus
-    │       ├── fn_toggleProtection.sqf    # Right-click toggle handler
+    │       ├── fn_toggleProtection.sqf    # Right-click toggle handler (Zeus context menu)
+    │       ├── fn_protect.sqf             # API: protect a unit from culling
+    │       ├── fn_unprotect.sqf           # API: return a unit to the culling pool
+    │       ├── fn_isCulled.sqf            # API: returns true if unit is currently culled
+    │       ├── fn_getStats.sqf            # API: returns last-tick stats HashMap
+    │       ├── fn_waypointMonitor.sqf     # Detects Zeus/script-assigned waypoints
     │       ├── fn_setCullerEnabled.sqf    # Server-side culler on/off
     │       ├── fn_applySettings.sqf       # Server-side settings update (mid-op)
     │       ├── fn_initZeusHooks.sqf       # Status window lifecycle + 3D labels
