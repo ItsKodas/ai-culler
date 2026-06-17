@@ -176,6 +176,17 @@ while {true} do {
         ];
     };
 
+    AIC_lastStats = createHashMapFromArray [
+        ["active",    _activeCount],
+        ["los",       count _inRangeLOS],
+        ["noLos",     count _inRangeNoLOS],
+        ["culled",    _culledCount],
+        ["protected", _protectedCount],
+        ["override",  _overrideCount],
+        ["total",     _totalAI],
+        ["serverFps", AIC_serverFPS]
+    ];
+
     [_activeCount, count _inRangeLOS, count _inRangeNoLOS, count _outOfRange, _protectedCount, _culledCount, _overrideCount, _totalAI, AIC_serverFPS]
         call AIC_fnc_broadcastStats;
 
