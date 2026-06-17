@@ -76,19 +76,13 @@ while {true} do {
         // supplemented by behaviour state for units recently in contact.
         private _inCombat = false;
         if (side _unit != civilian) then {
-            if (behaviour _unit == "COMBAT") then {
+            private _combatEnemies = _unit nearEntities [["CAManBase"], AIC_combatRadius] select {
+                alive _x && !isPlayer _x && side _x != civilian &&
+                (side _x getFriend side _unit) < 0.6
+            };
+            if (_combatEnemies isNotEqualTo []) then {
                 _inCombat = true;
-            } else {
-                private _combatEnemies = _unit nearEntities [["CAManBase"], AIC_combatRadius] select {
-                    alive _x && !isPlayer _x && side _x != civilian &&
-                    (side _x getFriend side _unit) < 0.6
-                };
-                if (_combatEnemies isNotEqualTo []) then {
-                    _inCombat = true;
-                    // Mark enemy groups so they are forced active later in this same tick,
-                    // even if no player is near them.
-                    { _forceActiveGroups pushBackUnique (group _x) } forEach _combatEnemies;
-                };
+                { _forceActiveGroups pushBackUnique (group _x) } forEach _combatEnemies;
             };
         };
 

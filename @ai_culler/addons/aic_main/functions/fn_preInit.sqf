@@ -11,6 +11,7 @@ if (isNil "AIC_combatRadius")     then { AIC_combatRadius    = 400   };
 if (isNil "AIC_debug")            then { AIC_debug           = false };
 if (isNil "AIC_cullerEnabled")       then { AIC_cullerEnabled      = true };
 if (isNil "AIC_showNotifications")   then { AIC_showNotifications  = true };
+if (isNil "AIC_lastStats")           then { AIC_lastStats          = createHashMap };
 
 // Client renderer defaults (also fall back here without CBA)
 if (isNil "AIC_showLabels")   then { AIC_showLabels   = true };
