@@ -54,12 +54,12 @@ AIC_clientPFH = [{
     private _candidates = allUnits select {
         !isPlayer _x && {alive _x && {_x isKindOf "CAManBase" && {vehicle _x == _x && {(_x distance player) < AIC_clientRadius}}}}
     };
-    private _candidateSet = createHashMapFromArray (_candidates apply { [_x, true] });
+    private _candidateSet = createHashMapFromArray (_candidates apply { [netId _x, true] });
 
     // --- Every tick: reveal from the COMMITTED set (left pool / closed inside safe radius) ---
     {
         if (isNull _x) then { continue };
-        if !(_candidateSet getOrDefault [_x, false]) then { _x hideObject false; continue };
+        if !(_candidateSet getOrDefault [netId _x, false]) then { _x hideObject false; continue };
         if ((_x distance player) <= AIC_clientSafeRadius) then { _x hideObject false };
     } forEach AIC_clientHidden;
 
@@ -68,7 +68,7 @@ AIC_clientPFH = [{
         private _stillHidden = [];
         {
             if (isNull _x) then { continue };
-            if (!(_candidateSet getOrDefault [_x, false]) || { (_x distance player) <= AIC_clientSafeRadius }) then {
+            if (!(_candidateSet getOrDefault [netId _x, false]) || { (_x distance player) <= AIC_clientSafeRadius }) then {
                 _x hideObject false;
             } else {
                 _stillHidden pushBack _x;
