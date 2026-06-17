@@ -3,14 +3,16 @@ if !(isServer) exitWith {};
 diag_log "[AIC] Starting culler loop";
 
 while {true} do {
+    private _allUnitsRaw = allUnits;
+
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
-        private _toEnable = allUnits select { _x getVariable ["AIC_disabled", false] };
+        private _toEnable = _allUnitsRaw select { _x getVariable ["AIC_disabled", false] };
         { [_x] call AIC_fnc_enableUnit; } forEach _toEnable;
         if (_toEnable isNotEqualTo []) then {
             [_toEnable] remoteExec ["AIC_fnc_updateUnitLabel", 0];
         };
-        private _totalAI = { alive _x && _x isKindOf "CAManBase" && !isPlayer _x } count allUnits;
+        private _totalAI = { alive _x && _x isKindOf "CAManBase" && !isPlayer _x } count _allUnitsRaw;
         [0, 0, 0, 0, 0, 0, 0, _totalAI, AIC_serverFPS] call AIC_fnc_broadcastStats;
         sleep AIC_checkInterval;
         continue;
@@ -29,11 +31,11 @@ while {true} do {
         !isPlayer _x &&
         (_x getVariable ["AIC_zeusProtected", false]) &&
         (side _x in [west, east, resistance, civilian])
-    } count allUnits;
+    } count _allUnitsRaw;
 
     // Managed pool: living AI infantry on foot, unprotected, all factions.
     // vehicle _x == _x excludes crew seated inside vehicles — culling crew breaks the vehicle.
-    private _allAI = allUnits select {
+    private _allAI = _allUnitsRaw select {
         alive _x &&
         _x isKindOf "CAManBase" &&
         vehicle _x == _x &&
