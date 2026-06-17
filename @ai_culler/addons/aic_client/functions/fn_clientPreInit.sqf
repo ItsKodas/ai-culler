@@ -25,10 +25,10 @@ private _hasAce = isClass (configFile >> "CfgPatches" >> "ace_main");
 if (_hasAce) then {
     private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
     if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-    if (isNil "_vd" || { _vd <= 0 }) then { _vd = viewDistance };
+    if (isNil "_vd" || { _vd <= 0 }) then { _vd = objectViewDistance };
     AIC_clientRadius = _vd;
 } else {
-    AIC_clientRadius = viewDistance;
+    AIC_clientRadius = objectViewDistance;
 };
 
 [AIC_clientEnabled] call AIC_fnc_clientLoop;
@@ -41,10 +41,10 @@ if (_hasAce) then {
         if (_hasAce) then {
             private _vd = missionNamespace getVariable ["ace_viewdistance_viewDistanceOnFoot", 0];
             if (_vd == 0) then { _vd = getVideoOptions get "overallVisibility" };
-            if (isNil "_vd" || { _vd <= 0 }) then { _vd = viewDistance };
+            if (isNil "_vd" || { _vd <= 0 }) then { _vd = objectViewDistance };
             AIC_clientRadius = _vd;
         } else {
-            AIC_clientRadius = viewDistance;
+            AIC_clientRadius = objectViewDistance;
         };
     };
 };
