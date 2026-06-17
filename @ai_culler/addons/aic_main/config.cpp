@@ -23,8 +23,7 @@ class CfgFunctions {
             class registerSettings  {};
             class mainLoop         {};
             class waypointMonitor  {};
-            class enableUnit       {};
-            class disableUnit      {};
+            class setSimulation    {};
             class getCullDist      {};
             class broadcastStats   {};
             class toggleProtection {};

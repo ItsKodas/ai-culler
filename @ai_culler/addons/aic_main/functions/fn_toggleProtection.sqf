@@ -11,7 +11,7 @@ private _newState = (_units findIf { !(_x getVariable ["AIC_zeusProtected", fals
 {
     _x setVariable ["AIC_zeusProtected", _newState, true];
     if (_newState && { _x getVariable ["AIC_disabled", false] }) then {
-        [_x] call AIC_fnc_enableUnit;
+        [_x, true] call AIC_fnc_setSimulation;
     };
     if (AIC_debug) then {
         diag_log format ["[AIC] AIC_zeusProtected %1 -> %2", _x, _newState];

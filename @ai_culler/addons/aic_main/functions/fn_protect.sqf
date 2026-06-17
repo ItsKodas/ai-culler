@@ -3,6 +3,6 @@ if (isNull _unit || { !(_unit isKindOf "CAManBase") } || { isPlayer _unit }) exi
 if (!isServer) exitWith { [_unit] remoteExec ["AIC_fnc_protect", 2] };
 
 _unit setVariable ["AIC_zeusProtected", true, true];
-if (_unit getVariable ["AIC_disabled", false]) then { [_unit] call AIC_fnc_enableUnit };
+if (_unit getVariable ["AIC_disabled", false]) then { [_unit, true] call AIC_fnc_setSimulation };
 [_unit] remoteExec ["AIC_fnc_updateUnitLabel", 0];
 if (AIC_debug) then { diag_log format ["[AIC][API] Protected: %1", _unit] };

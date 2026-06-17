@@ -8,7 +8,7 @@ while {true} do {
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
         private _toEnable = _allUnitsRaw select { _x getVariable ["AIC_disabled", false] };
-        { [_x] call AIC_fnc_enableUnit; } forEach _toEnable;
+        [_toEnable, true] call AIC_fnc_setSimulation;
         if (_toEnable isNotEqualTo []) then {
             [_toEnable] remoteExec ["AIC_fnc_updateUnitLabel", 0];
         };
@@ -126,31 +126,30 @@ while {true} do {
         if ((_chunkCount % _chunkSize) == 0 && {_chunkCount < count _allAI}) then { sleep _yieldTime; };
     } forEach _allAI;
 
-    {
-        if (!(_x getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _x };
-        [_x] call AIC_fnc_disableUnit;
-    } forEach _outOfRange;
+    { if (!(_x getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _x } } forEach _outOfRange;
+    [_outOfRange, false] call AIC_fnc_setSimulation;
 
-    private _activeCount = 0;
-    {
-        if (_x getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _x };
-        [_x] call AIC_fnc_enableUnit;
-        _activeCount = _activeCount + 1;
-    } forEach _inRangeLOS;
+    { if (_x getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _x } } forEach _inRangeLOS;
+    [_inRangeLOS, true] call AIC_fnc_setSimulation;
+    private _activeCount = count _inRangeLOS;
 
     // Sort ascending by distance so the closest no-LOS units fill the cap first
     _inRangeNoLOS = [_inRangeNoLOS, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
+    private _noLosEnable  = [];
+    private _noLosDisable = [];
     {
         private _unit = _x select 0;
         if (_activeCount < AIC_maxActiveAI) then {
             if (_unit getVariable ["AIC_disabled", false]) then { _labelUpdates pushBack _unit };
-            [_unit] call AIC_fnc_enableUnit;
+            _noLosEnable pushBack _unit;
             _activeCount = _activeCount + 1;
         } else {
             if (!(_unit getVariable ["AIC_disabled", false])) then { _labelUpdates pushBack _unit };
-            [_unit] call AIC_fnc_disableUnit;
+            _noLosDisable pushBack _unit;
         };
     } forEach _inRangeNoLOS;
+    [_noLosEnable,  true]  call AIC_fnc_setSimulation;
+    [_noLosDisable, false] call AIC_fnc_setSimulation;
 
     if (_labelUpdates isNotEqualTo []) then {
         [_labelUpdates] remoteExec ["AIC_fnc_updateUnitLabel", 0];
