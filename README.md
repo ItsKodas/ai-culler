@@ -84,6 +84,7 @@ Open **Configure → Addon Options → AI Culler** before launching a mission. A
 | Min Active Radius | 200m | Units within this radius are always active (no LOS check) |
 | Combat Detection Radius | 400m | Radius used to detect AI vs AI combat engagement |
 | Debug Logging | false | RPT logging — enable for diagnostics only |
+| Show Enable/Disable Notifications | false | Show a notification to all players when the culler is enabled or disabled |
 
 #### Pre-op (without CBA_A3)
 
@@ -174,36 +175,38 @@ If **ZEN Enhanced Zeus** is loaded, a **Toggle Culler Protection** option appear
 
 ## Client-Side Renderer (`aic_client`)
 
+### Supported configurations
+
+The client renderer works in two scenarios only:
+
+| Scenario | Notes |
+|---|---|
+| **Singleplayer** | All AI are local; `hideObject` has no network side-effects |
+| **Dedicated server MP** | AI are server-local; clients only see remote units |
+
+**Listen server (host-client) is not supported.** When a player also hosts the server, they own AI locally — `hideObject` propagates to all connected clients, breaking visibility for everyone else.
+
 ### How it works
 
-Each client runs a LOS check between the player's eye position and every living AI infantry unit within `AIC_clientRadius`. If a unit is fully occluded — hidden behind terrain or solid objects — its model is hidden via `hideObject`. It is shown again the moment LOS is restored.
+Each client runs a two-tier LOS check between the player's eye position and every living AI infantry unit within `AIC_clientRadius`. If a unit is fully occluded it is hidden via `hideObject`. It is shown again the moment LOS is restored.
+
+**Tier 1 — Terrain (always):** `terrainIntersectASL` is a fast terrain-only raycast. If terrain blocks the line, the unit is hidden immediately and tier 2 is skipped. This cheap early-out catches the majority of cases.
+
+**Tier 2 — Surface intersection (within `AIC_clientSurfaceRadius`):** For units closer than 600m that passed the terrain check, `lineIntersectsSurfaces` is run against the Fire Geometry LOD. This catches buildings, walls, and solid structures. The following hit types are excluded and do not count as occlusion:
+- Trees (`isKindOf "Tree"`) and bushes (`isKindOf "Bush"`)
+- Objects with `"net"`, `"bag"`, or `"bunker"` in their class name (camo nets, sandbags, open bunker structures)
+- Glass and windows — Fire Geometry does not include transparent surfaces, so units remain visible through them
 
 The check is intentionally permissive:
-- **Trees and bushes are ignored** — a unit behind a tree is still hidden, but the tree itself does not count as occlusion
-- **Terrain is checked first** (cheap raycast), then solid objects (building walls, vehicles, rocks)
-- **Safe radius** — units within `AIC_clientSafeRadius` are always rendered regardless of LOS, preventing pop-in as AI close distance
+- **Safe radius** — units within `AIC_clientSafeRadius` (default 150m) are always rendered regardless of LOS, preventing pop-in as AI close distance
 - **ADS cone** — when the player is holding RMB (precision aim) or looking through a weapon optic, AI within ~30° of the camera's aim direction are force-rendered even if occluded. This prevents units from vanishing as you peek around corners to engage them
-- **Zeus camera** — while the Zeus interface is open, no units are hidden. All previously hidden units are restored immediately on entry so the Zeus player sees the full battlefield
+- **Zeus camera** — while the Zeus interface is open, no units are hidden. All previously hidden units are restored as the sweep cycles through them so the Zeus player sees the full battlefield
 
 `hideObject` is client-local — it affects only the machine running the check and does not change AI state or hitboxes for any other player.
 
-#### Adaptive cadence
-
-The renderer does not run on a fixed interval. It uses Arma's built-in 16-frame `diag_fps` rolling average to continuously adjust its own tick rate via `linearConversion`:
-
-| FPS | Tick interval |
-|---|---|
-| 45+ | 0.2s (fastest) |
-| 15 | 1.0s (slowest) |
-| Between | Linear ramp |
-
-Under load the renderer backs off automatically, reducing its own contribution to frame time. When performance recovers it tightens back up without any manual adjustment.
-
 #### Budgeted LOS sweep
 
-Rather than checking every AI candidate in a single tick, the LOS work is spread across multiple ticks in slices. Each slice processes `ceil(poolSize / AIC_clientSweepTicks)` units (default: targets completion in ~3 ticks). This eliminates single-tick spikes when many AI are in radius — frame cost is capped and predictable regardless of AI count.
-
-If FPS drops below `AIC_clientFpsFloor`, the slice size is throttled down to `AIC_clientBudgetMin` to protect frame time at the cost of slower sweep completion. Both limits are clamped to `AIC_clientBudgetMax` (default 60) as a spike guard.
+Rather than checking every AI candidate in a single tick, the LOS work is spread across multiple ticks in slices. The renderer runs at a fixed 20Hz (every 0.05s) and each tick processes `ceil(poolSize / 60)` units — targeting a full sweep in ~3 seconds. This eliminates single-tick spikes when many AI are in radius; frame cost is capped and predictable regardless of AI count.
 
 ### Why this helps
 
@@ -216,17 +219,19 @@ This is architecturally different from mods like A3PE (Arma 3 Performance Extens
 When **Debug HUD** is enabled from Addon Options (admin only), a small yellow overlay appears in the bottom-left corner of the screen:
 
 ```
-CR:47v 112h [ADS] | fps45 int0.20 bud25 | sweep25/100
+CR:47v 112h | fps45 min42 d3 r93% | sweep25/159 batch3 [ADS]
 ```
 
 | Field | Description |
 |---|---|
 | `47v 112h` | Visible and hidden AI counts |
+| `fps45` | Current FPS (`diag_fps`) |
+| `min42` | Minimum FPS this session (`diag_fpsmin`) |
+| `d3` | Delta between current and minimum FPS |
+| `r93%` | Ratio of min FPS to current FPS — lower means more variance |
+| `sweep25/159` | Cursor position / total queue size for the current sweep |
+| `batch3` | Number of units processed this tick |
 | `[ADS]` | ADS cone override is active (RMB held or optic view open) |
-| `fps45` | Smoothed FPS average driving the cadence |
-| `int0.20` | Current tick interval in seconds |
-| `bud25` | Current LOS slice size (raycasts this tick) |
-| `sweep25/100` | Cursor position in the current sweep queue |
 
 This updates every renderer tick and disappears automatically when the renderer or debug mode is turned off.
 
@@ -240,7 +245,8 @@ Open **Configure → Addon Options → AI Culler - Client** to set per-client pr
 | Show Unit Name Labels | true | Prefix unit names with `[Culled]` / `[Protected]` / `[Override]` when you are Zeus |
 | Show 3D Floating Labels | true | Draw floating 3D text above culled/protected/override units in Zeus view |
 | 3D Label Draw Distance | 800m | Maximum camera distance at which 3D labels are rendered |
-| Safe Radius | 75m | AI within this distance are always rendered regardless of LOS |
+| Safe Radius | 150m | AI within this distance are always rendered regardless of LOS |
+| Surface LOS Radius | 600m | Within this distance, full surface intersection is used in addition to terrain LOS. Beyond it, terrain-only. |
 
 **Debug HUD** (`AIC_clientDebug`) is server-enforced (`isGlobal = 1`) — the server admin controls it and the value is broadcast to all clients. When enabled it activates the renderer overlay on every connected player simultaneously. It is grouped under the **AI Culler - Client** category but only editable from the server side.
 
@@ -252,23 +258,6 @@ Open **Configure → Addon Options → AI Culler - Client** to set per-client pr
 - **Without ACE3** — reads Arma's native `viewDistance` directly
 
 This means the renderer automatically checks AI only as far as the player can actually see, with no manual radius configuration needed.
-
-**Adaptive cadence knobs:**
-
-| Variable | Default | Description |
-|---|---|---|
-| `AIC_clientIntervalMin` | 0.2s | Fastest tick rate, used at or above `FpsTarget` |
-| `AIC_clientIntervalMax` | 1.0s | Slowest tick rate, used at or below `FpsFloor` |
-| `AIC_clientFpsTarget` | 45 | FPS at which the fastest cadence is used |
-| `AIC_clientFpsFloor` | 15 | FPS at which the slowest cadence and minimum budget kick in |
-
-**Budget knobs:**
-
-| Variable | Default | Description |
-|---|---|---|
-| `AIC_clientSweepTicks` | 3 | Target number of ticks to complete a full LOS sweep — primary tuning lever |
-| `AIC_clientBudgetMin` | 10 | Minimum LOS checks per tick when FPS is below `FpsFloor` |
-| `AIC_clientBudgetMax` | 60 | Hard cap on LOS checks per tick regardless of pool size |
 
 ---
 
@@ -338,6 +327,17 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 ---
 
 ## Changelog
+
+### v3.7.0
+- Rewrote `aic_client` loop with separate SP and MP paths — singleplayer uses the local AI pool; dedicated server MP filters to remote-only units. Listen server (host-client) is explicitly unsupported and documented
+- Two-tier LOS: `terrainIntersectASL` runs first as a cheap early-out; `lineIntersectsSurfaces` (Fire Geometry LOD) is only run for units closer than `AIC_clientSurfaceRadius` that passed the terrain check, keeping the expensive raycast off the hot path for distant units
+- Added `AIC_clientSurfaceRadius` (default 600m) — configurable via CBA Addon Options; beyond this distance only terrain LOS is used
+- Surface intersection filter updated to exclude objects with `"net"`, `"bag"`, or `"bunker"` in their class name (case-insensitive) in addition to trees and bushes — camo nets and sandbag positions no longer incorrectly occlude units
+- Switched surface intersection positions to `eyePos player` / `eyePos _unit` — accurate eye-level origin points rather than `getPosASL + [0,0,3]` approximation, fixing cases where the check was missing real obstructions or incorrectly blocking clear lines
+- Ported ADS cone reveal system — units within ~30° of aim direction are force-revealed while holding precision aim or looking through an optic; `[ADS]` tag shown on debug HUD
+- `AIC_clientSafeRadius` default raised from 75m to 150m
+- Zeus camera bypass now uses `findDisplay 312` (curator display) — units in the sweep queue are unhidden as the sweep processes them while Zeus is open
+- Changed `AIC_showNotifications` default to `false` — enable/disable popups are now opt-in
 
 ### v3.6.0
 - Added public scripting API: `AIC_fnc_protect`, `AIC_fnc_unprotect`, `AIC_fnc_isCulled`, `AIC_fnc_getStats` — mission makers and mod authors can now protect/unprotect units and query culler state without touching internal variables. Server-mutating calls auto-forward from client machines via `remoteExec`. See [docs/API.md](docs/API.md)
