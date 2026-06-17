@@ -112,7 +112,7 @@ if (isNil "CBA_fnc_addSetting") exitWith { diag_log "[AIC] fn_registerSettings: 
     "CHECKBOX",
     ["Show Enable/Disable Notifications", "Show a notification to all players when the culler is enabled or disabled."],
     "AI Culler",
-    true,
+    false,
     1,
     {}
 ] call CBA_fnc_addSetting;
