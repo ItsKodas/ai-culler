@@ -126,7 +126,7 @@ if (isNil "CBA_fnc_addSetting") exitWith { diag_log "[AIC] fn_registerSettings: 
     "AI Culler - Client",
     true,
     0,
-    {}
+    { [_this] call AIC_fnc_clientLoop }
 ] call CBA_fnc_addSetting;
 
 [

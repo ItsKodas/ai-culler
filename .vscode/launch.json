@@ -8,7 +8,19 @@
             "preLaunchTask": "${defaultBuildTask}",
             "noPause": true,
             "windowed": false,
-            "args": ["-mod=${workspaceFolder}/@ai_culler"]
+            "args": [
+                "-mod=${workspaceFolder}/@ai_culler"
+            ],
+            "mission": "${workspaceFolder}/funny.Stratis/mission.sqm"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Compound",
+            "configurations": [
+                "Build & Launch Arma",
+                "Build & Launch Arma"
+            ]
         }
     ]
 }

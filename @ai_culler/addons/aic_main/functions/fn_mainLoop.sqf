@@ -94,18 +94,15 @@ while {true} do {
                     // Within minimum active radius of any player — always active, skip raycast
                     _inRangeLOS pushBack _unit;
                 } else {
-                    // LOS check against ALL players — active if any has line of sight
-                    // terrainIntersectASL catches hills; lineIntersectsObjs catches buildings
                     private _unitEyePos = eyePos _unit;
                     private _hasLOS = (_refPoints findIf {
                         private _eyePos = _x select 0;
                         private _player = _x select 1;
-                        private _los = !(terrainIntersectASL [_eyePos, _unitEyePos]);
-                        if (_los) then {
-                            private _hits = lineIntersectsObjs [_eyePos, _unitEyePos, _player, _unit];
-                            _los = (_hits findIf { !(_x isKindOf "Tree") && {!(_x isKindOf "Bush")} }) == -1;
-                        };
-                        _los
+                        private _hits = lineIntersectsSurfaces [_eyePos, _unitEyePos, _player, _unit, true, 1];
+                        (_hits findIf {
+                            private _obj = _x select 2;
+                            isNull _obj || { !(_obj isKindOf "Tree") && { !(_obj isKindOf "Bush") } }
+                        }) == -1
                     }) != -1;
 
                     if (_hasLOS) then {
