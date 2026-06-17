@@ -92,7 +92,7 @@ if (!hasInterface) exitWith {};
                         drawIcon3D ["", _color, (ASLToAGL getPosASLVisual _x) vectorAdd [0, 0, 2.5], 0, 0, 0, _label, 2, 0.035, "RobotoCondensed"];
                     };
                 };
-            } forEach allUnits;
+            } forEach (allUnits select { !isPlayer _x && { _x isKindOf "CAManBase" && { vehicle _x == _x } } });
         }];
 
         waitUntil { isNull (findDisplay 312) };

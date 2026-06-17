@@ -65,12 +65,7 @@ while {true} do {
 
         private _cullDist = [_unit] call AIC_fnc_getCullDist;
 
-        // Find nearest reference point distance (for range check)
-        private _nearestDist = 99999;
-        {
-            private _d = _unit distance (_x select 0);
-            if (_d < _nearestDist) then { _nearestDist = _d };
-        } forEach _refPoints;
+        private _nearestDist = selectMin ((_refPoints apply { _unit distance (_x select 0) }) + [99999]);
 
         // Combat detection: one nearEntities call, bidirectional group activation,
         // supplemented by behaviour state for units recently in contact.
@@ -95,7 +90,7 @@ while {true} do {
                 // Out of range — cull
                 _outOfRange pushBack _unit;
             } else {
-                if ((_refPoints findIf { _unit distance (_x select 0) <= AIC_minActiveRadius }) != -1) then {
+                if (_nearestDist <= AIC_minActiveRadius) then {
                     // Within minimum active radius of any player — always active, skip raycast
                     _inRangeLOS pushBack _unit;
                 } else {
