@@ -8,5 +8,8 @@
     "editor.insertSpaces": true,
     "editor.formatOnSave": false,
     "editor.rulers": [80],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "adate.arma3ToolsDirectory": "D:/SteamLibrary/steamapps/common/Arma 3 Tools",
+    "adate.arma3directory": "D:/SteamLibrary/steamapps/common/Arma 3",
+
 }

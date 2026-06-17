@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "Arma-3",
+            "request": "launch",
+            "name": "Build & Launch Arma",
+            "preLaunchTask": "${defaultBuildTask}",
+            "noPause": true,
+            "windowed": false,
+            "args": ["-mod=${workspaceFolder}/@ai_culler"]
+        }
+    ]
+}
