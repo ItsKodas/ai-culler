@@ -44,10 +44,11 @@ while {true} do {
         (side _x in [west, east, resistance, civilian])
     };
 
-    private _outOfRange   = [];
-    private _inRangeNoLOS = [];
-    private _inRangeLOS   = [];
-    private _labelUpdates = [];
+    private _outOfRange      = [];
+    private _inRangeNoLOS    = [];
+    private _inRangeLOS      = [];
+    private _labelUpdates    = [];
+    private _forceActiveGroups = [];
 
     // Process in chunks of 25, yielding between chunks to spread raycasts and
     // nearEntities calls across time rather than blocking the server thread.
@@ -71,15 +72,29 @@ while {true} do {
             if (_d < _nearestDist) then { _nearestDist = _d };
         } forEach _refPoints;
 
-        private _inCombat = side _unit != civilian && {
-            _unit nearEntities [["CAManBase"], AIC_combatRadius] findIf {
-                alive _x && !isPlayer _x && side _x != civilian &&
-                (side _x getFriend side _unit) < 0.6
-            } != -1
+        // Combat detection: one nearEntities call, bidirectional group activation,
+        // supplemented by behaviour state for units recently in contact.
+        private _inCombat = false;
+        if (side _unit != civilian) then {
+            if (behaviour _unit == "COMBAT") then {
+                _inCombat = true;
+            } else {
+                private _combatEnemies = _unit nearEntities [["CAManBase"], AIC_combatRadius] select {
+                    alive _x && !isPlayer _x && side _x != civilian &&
+                    (side _x getFriend side _unit) < 0.6
+                };
+                if (_combatEnemies isNotEqualTo []) then {
+                    _inCombat = true;
+                    // Mark enemy groups so they are forced active later in this same tick,
+                    // even if no player is near them.
+                    { _forceActiveGroups pushBackUnique (group _x) } forEach _combatEnemies;
+                };
+            };
         };
 
-        if ((group _unit) getVariable ["AIC_zeusWaypoint", false] || _inCombat) then {
-            // Zeus-assigned waypoint or AI vs AI combat — active regardless of player proximity
+        if ((group _unit) getVariable ["AIC_zeusWaypoint", false]
+            || _inCombat
+            || (group _unit) in _forceActiveGroups) then {
             _inRangeLOS pushBack _unit;
         } else {
             if (_nearestDist > _cullDist) then {
