@@ -3,18 +3,14 @@
 // the per-group baseline while not in combat. Runs on the server only.
 if (!isServer) exitWith {};
 
-private _aiGroups = { (units _x) findIf { !isPlayer _x && {_x isKindOf "CAManBase"} } != -1 };
-
 // Snapshot editor-placed waypoints per group after mission init
 sleep 5;
 {
     if (_x getVariable ["AIC_waypointBaseline", -1] < 0) then {
         _x setVariable ["AIC_waypointBaseline", count (waypoints _x)];
     };
-} forEach (allGroups select _aiGroups);
+} forEach (allGroups select { (units _x) findIf { !isPlayer _x && {_x isKindOf "CAManBase"} } != -1 });
 if (AIC_debug) then { diag_log "[AIC][WP] Baseline snapshot complete"; };
-
-private _activeGroups = { (units _x) findIf { !isPlayer _x && {alive _x && {_x isKindOf "CAManBase"}} } != -1 };
 
 while {true} do {
     sleep AIC_checkInterval;
@@ -66,5 +62,5 @@ while {true} do {
                 [(units _grp)] remoteExec ["AIC_fnc_updateUnitLabel", 0];
             };
         };
-    } forEach (allGroups select _activeGroups);
+    } forEach (allGroups select { (units _x) findIf { !isPlayer _x && {alive _x && {_x isKindOf "CAManBase"}} } != -1 });
 };
