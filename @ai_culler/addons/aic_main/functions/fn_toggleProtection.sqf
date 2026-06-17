@@ -2,7 +2,7 @@ params ["_units"];
 
 if !(_units isEqualType []) then { _units = [_units] };
 
-_units = _units select { alive _x && _x isKindOf "CAManBase" && !isPlayer _x };
+_units = _units select { alive _x && {_x isKindOf "CAManBase" && {!isPlayer _x}} };
 if (_units isEqualTo []) exitWith {};
 
 // Smart toggle: protect all if any are unprotected; unprotect all only when all are already protected

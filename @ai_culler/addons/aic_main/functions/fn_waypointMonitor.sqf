@@ -10,7 +10,7 @@ sleep 5;
     if (_grp getVariable ["AIC_waypointBaseline", -1] < 0) then {
         _grp setVariable ["AIC_waypointBaseline", count (waypoints _grp)];
     };
-} forEach (allUnits select { !isPlayer _x && _x isKindOf "CAManBase" });
+} forEach (allUnits select { !isPlayer _x && {_x isKindOf "CAManBase"} });
 if (AIC_debug) then { diag_log "[AIC][WP] Baseline snapshot complete"; };
 
 while {true} do {
@@ -40,7 +40,7 @@ while {true} do {
                     private _enabled = [];
                     {
                         if (!(_x getVariable ["AIC_zeusProtected", false]) &&
-                            (_x getVariable ["AIC_disabled", false])) then {
+                            {_x getVariable ["AIC_disabled", false]}) then {
                             [_x] call AIC_fnc_enableUnit;
                             _enabled pushBack _x;
                         };
@@ -67,5 +67,5 @@ while {true} do {
                 };
             };
         };
-    } forEach (allUnits select { !isPlayer _x && _x isKindOf "CAManBase" && alive _x });
+    } forEach (allUnits select { !isPlayer _x && {_x isKindOf "CAManBase" && {alive _x}} });
 };

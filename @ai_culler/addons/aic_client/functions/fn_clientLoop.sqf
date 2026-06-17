@@ -44,7 +44,7 @@ AIC_clientPFH = [{
 
     private _playerEyePos = eyePos player;
 
-    private _ads = (inputAction "zoomTemp" > 0) || (inputAction "opticsTemp" > 0) || (cameraView == "GUNNER");
+    private _ads = (inputAction "zoomTemp" > 0) || {(inputAction "opticsTemp" > 0) || {cameraView == "GUNNER"}};
     private _lookDir = [0,0,0];
     if (_ads) then {
         _lookDir = vectorNormalized ((positionCameraToWorld [0,0,1]) vectorDiff (positionCameraToWorld [0,0,0]));
@@ -52,7 +52,7 @@ AIC_clientPFH = [{
 
     // --- Cheap, every tick: current candidate pool ---
     private _candidates = allUnits select {
-        !isPlayer _x && alive _x && (_x isKindOf "CAManBase") && vehicle _x == _x && (_x distance player) < AIC_clientRadius
+        !isPlayer _x && {alive _x && {_x isKindOf "CAManBase" && {vehicle _x == _x && {(_x distance player) < AIC_clientRadius}}}}
     };
 
     // --- Every tick: reveal from the COMMITTED set (left pool / closed inside safe radius) ---
@@ -104,7 +104,7 @@ AIC_clientPFH = [{
             private _blocked    = terrainIntersectASL [_playerEyePos, _unitEyePos];
             if (!_blocked) then {
                 private _hits = lineIntersectsObjs [_playerEyePos, _unitEyePos, vehicle player, _unit];
-                _blocked = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) != -1;
+                _blocked = (_hits findIf { !(_x isKindOf "Tree") && {!(_x isKindOf "Bush")} }) != -1;
             };
             if (_blocked && _ads) then {
                 private _toUnit = vectorNormalized (_unitEyePos vectorDiff _playerEyePos);

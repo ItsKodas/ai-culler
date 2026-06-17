@@ -12,7 +12,7 @@ while {true} do {
         if (_toEnable isNotEqualTo []) then {
             [_toEnable] remoteExec ["AIC_fnc_updateUnitLabel", 0];
         };
-        private _totalAI = { alive _x && _x isKindOf "CAManBase" && !isPlayer _x } count _allUnitsRaw;
+        private _totalAI = { alive _x && {_x isKindOf "CAManBase" && {!isPlayer _x}} } count _allUnitsRaw;
         [0, 0, 0, 0, 0, 0, 0, _totalAI, AIC_serverFPS] call AIC_fnc_broadcastStats;
         sleep AIC_checkInterval;
         continue;
@@ -26,22 +26,22 @@ while {true} do {
     // Count protected infantry before the main filter excludes them
     private _protectedCount = {
         alive _x &&
-        _x isKindOf "CAManBase" &&
-        vehicle _x == _x &&
-        !isPlayer _x &&
-        (_x getVariable ["AIC_zeusProtected", false]) &&
-        (side _x in [west, east, resistance, civilian])
+        {_x isKindOf "CAManBase" &&
+        {vehicle _x == _x &&
+        {!isPlayer _x &&
+        {_x getVariable ["AIC_zeusProtected", false] &&
+        {side _x in [west, east, resistance, civilian]}}}}}
     } count _allUnitsRaw;
 
     // Managed pool: living AI infantry on foot, unprotected, all factions.
     // vehicle _x == _x excludes crew seated inside vehicles — culling crew breaks the vehicle.
     private _allAI = _allUnitsRaw select {
         alive _x &&
-        _x isKindOf "CAManBase" &&
-        vehicle _x == _x &&
-        !isPlayer _x &&
-        !(_x getVariable ["AIC_zeusProtected", false]) &&
-        (side _x in [west, east, resistance, civilian])
+        {_x isKindOf "CAManBase" &&
+        {vehicle _x == _x &&
+        {!isPlayer _x &&
+        {!(_x getVariable ["AIC_zeusProtected", false]) &&
+        {side _x in [west, east, resistance, civilian]}}}}}
     };
 
     private _outOfRange      = [];
@@ -77,8 +77,8 @@ while {true} do {
         private _inCombat = false;
         if (side _unit != civilian) then {
             private _combatEnemies = _unit nearEntities [["CAManBase"], AIC_combatRadius] select {
-                alive _x && !isPlayer _x && side _x != civilian &&
-                (side _x getFriend side _unit) < 0.6
+                alive _x && {!isPlayer _x && {side _x != civilian &&
+                {(side _x getFriend side _unit) < 0.6}}}
             };
             if (_combatEnemies isNotEqualTo []) then {
                 _inCombat = true;
@@ -88,7 +88,7 @@ while {true} do {
 
         if ((group _unit) getVariable ["AIC_zeusWaypoint", false]
             || _inCombat
-            || (group _unit) in _forceActiveGroups) then {
+            || {(group _unit) in _forceActiveGroups}) then {
             _inRangeLOS pushBack _unit;
         } else {
             if (_nearestDist > _cullDist) then {
@@ -108,7 +108,7 @@ while {true} do {
                         private _los = !(terrainIntersectASL [_eyePos, _unitEyePos]);
                         if (_los) then {
                             private _hits = lineIntersectsObjs [_eyePos, _unitEyePos, _player, _unit];
-                            _los = (_hits findIf { !(_x isKindOf "Tree") && !(_x isKindOf "Bush") }) == -1;
+                            _los = (_hits findIf { !(_x isKindOf "Tree") && {!(_x isKindOf "Bush")} }) == -1;
                         };
                         _los
                     }) != -1;
@@ -123,7 +123,7 @@ while {true} do {
         };
 
         _chunkCount = _chunkCount + 1;
-        if ((_chunkCount % _chunkSize) == 0 && _chunkCount < count _allAI) then { sleep _yieldTime; };
+        if ((_chunkCount % _chunkSize) == 0 && {_chunkCount < count _allAI}) then { sleep _yieldTime; };
     } forEach _allAI;
 
     {
