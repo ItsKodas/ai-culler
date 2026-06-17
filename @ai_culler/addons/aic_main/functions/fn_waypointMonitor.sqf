@@ -11,7 +11,7 @@ while {true} do {
         private _wpCount = count (waypoints _grp);
         private _curWP   = currentWaypoint _grp;
 
-        if (_wpCount != _curWP) then {
+        if (_wpCount > _curWP) then {
             if (!(_grp getVariable ["AIC_zeusWaypoint", false])) then {
                 if (AIC_debug) then { diag_log format ["[AIC][WP] Active waypoints on group %1 (count=%2 cur=%3)", _grp, _wpCount, _curWP]; };
                 _grp setVariable ["AIC_zeusWaypoint", true, true];
