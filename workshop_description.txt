@@ -9,7 +9,9 @@ A two-part performance mod for Arma 3 that tackles both the server-side simulati
 [h1]The Solution[/h1]
 [b]aic_main[/b] (server + Zeus) caps the number of actively-simulating AI and prioritises units by proximity and line of sight. Vehicles are never culled. Protected, in-combat, and Zeus-ordered units are always active regardless of distance.
 
-[b]aic_client[/b] (every player client) hides occluded AI models via 'hideObject', removing them from each player's render pipeline. Trees and bushes don't count as occlusion. Units within 75m are always rendered to prevent pop-in. An ADS-cone bypass keeps units visible while you're aiming at them. The occlusion radius is automatically read from each player's view distance (ACE3 or native) and kept in sync throughout the mission.
+[b]aic_client[/b] (every player client) hides occluded AI models via 'hideObject', removing them from each player's render pipeline. It uses a two-tier LOS check: a fast terrain-only raycast runs first, and a full surface intersection check (catching buildings and walls) runs only for units within 600m. Camo nets, sandbags, open bunker structures, trees, and bushes are excluded from occlusion — units stay visible through them. Glass and windows pass through naturally. Units within 150m are always rendered to prevent pop-in. An ADS-cone bypass keeps units visible while you're aiming at them. While Zeus is open, all units are visible. The occlusion radius is automatically read from each player's view distance (ACE3 or native) and kept in sync throughout the mission.
+
+[i]Supported on singleplayer and dedicated server MP only. Listen server (host-client) is not supported.[/i]
 
 Both addons ship in one mod — the right code runs on the right machine automatically.
 
@@ -17,7 +19,7 @@ Both addons ship in one mod — the right code runs on the right machine automat
 A status window opens automatically when Zeus is active. Adjust max active AI, per-faction cull distances, check interval, and combat detection radius on the fly — changes broadcast to the server instantly. A live FPS sparkline tracks server performance over the last 88 seconds with current, average, min, and max in the title bar. No restart, no rebuild.
 
 [h1]CBA Addon Options[/h1]
-All settings are exposed under [b]Configure → Addon Options[/b] and persist between sessions. Server settings (cull distances, AI cap, intervals) are server-enforced and broadcast to all clients. Client settings (label display, safe radius, enable toggle) are per-player. Requires CBA_A3; falls back to hard-coded defaults without it.
+All settings are exposed under [b]Configure → Addon Options[/b] and persist between sessions. Server settings (cull distances, AI cap, intervals) are server-enforced and broadcast to all clients. Client settings (label display, safe radius, surface LOS radius, enable toggle) are per-player. Requires CBA_A3; falls back to hard-coded defaults without it.
 
 [h1]Features[/h1]
 [list]
