@@ -339,6 +339,16 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 
 ## Changelog
 
+### v3.6.0
+- Added public scripting API: `AIC_fnc_protect`, `AIC_fnc_unprotect`, `AIC_fnc_isCulled`, `AIC_fnc_getStats` — mission makers and mod authors can now protect/unprotect units and query culler state without touching internal variables. Server-mutating calls auto-forward from client machines via `remoteExec`. See [docs/API.md](docs/API.md)
+- Added `AIC_lastStats` HashMap — culler tick stats are stored after every pass and readable via `AIC_fnc_getStats` (keys: `active`, `los`, `noLos`, `culled`, `protected`, `override`, `total`, `serverFps`)
+- Bidirectional combat detection: when unit A detects enemy unit B within `AIC_combatRadius`, both A's and B's groups are forced active in the same tick. Previously only A's side was kept live, leaving B's group potentially culled mid-engagement
+- Added `behaviour _unit == "COMBAT"` check as a supplementary combat signal — units recently in contact stay active even if their enemy has briefly moved out of `AIC_combatRadius`
+- Extracted waypoint monitor into `AIC_fnc_waypointMonitor` — the 65-line Zeus waypoint detection loop is now its own registered function rather than an inline spawn block in `fn_postInit.sqf`
+- `allUnits` is now snapshotted once at the top of each culler tick and reused throughout — eliminates 3 redundant `allUnits` calls per tick
+- Removed dead `AIC_fnc_registerSettings` call from `fn_preInit.sqf` (preInit runs before CBA's XEH phase, so the registration was immediately discarded by CBA)
+- Added **Show Notifications** to CBA Addon Options (server-enforced) — when disabled, the in-game notification popup on culler enable/disable is suppressed
+
 ### v3.5.0
 - Removed Zeus Client Renderer panel — all client renderer settings are now managed via CBA Addon Options
 - Added **Enable Client Renderer** and **Safe Radius** to the **AI Culler - Client** addon options page (per-player)
