@@ -1,10 +1,12 @@
 if (!hasInterface) exitWith {};
 
 // Only apply hard-coded defaults if CBA hasn't already populated these from the saved profile
-if (isNil "AIC_clientEnabled")    then { AIC_clientEnabled    = true  };
-if (isNil "AIC_clientSafeRadius") then { AIC_clientSafeRadius = 75    };
-if (isNil "AIC_clientDebug")      then { AIC_clientDebug      = false };
+if (isNil "AIC_clientEnabled")       then { AIC_clientEnabled       = true  };
+if (isNil "AIC_clientSafeRadius")    then { AIC_clientSafeRadius    = 150   };
+if (isNil "AIC_clientSurfaceRadius") then { AIC_clientSurfaceRadius = 600   };
+if (isNil "AIC_clientDebug")         then { AIC_clientDebug         = false };
 AIC_clientHidden     = [];
+AIC_clientADS        = false;
 
 // --- Adaptive cadence (FPS -> interval ramp) ---
 AIC_clientIntervalMin = 0.2;   // fastest cadence at/above FpsTarget
@@ -29,7 +31,7 @@ if (_hasAce) then {
     AIC_clientRadius = viewDistance;
 };
 
-[] call AIC_fnc_clientLoop;
+[AIC_clientEnabled] call AIC_fnc_clientLoop;
 
 // Slow poll: track mid-mission view distance changes without touching the hot path
 [_hasAce] spawn {

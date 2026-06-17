@@ -164,7 +164,17 @@ if (isNil "CBA_fnc_addSetting") exitWith { diag_log "[AIC] fn_registerSettings: 
     "SLIDER",
     ["Safe Radius (m)", "AI within this distance are always visible regardless of line of sight."],
     "AI Culler - Client",
-    [0, 500, 75, 0],
+    [0, 500, 150, 0],
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
+    "AIC_clientSurfaceRadius",
+    "SLIDER",
+    ["Surface LOS Radius (m)", "Within this distance, full surface intersection (buildings, walls) is used instead of terrain-only LOS."],
+    "AI Culler - Client",
+    [0, 1500, 600, 0],
     0,
     {}
 ] call CBA_fnc_addSetting;
