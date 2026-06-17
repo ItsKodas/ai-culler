@@ -28,6 +28,10 @@ class CfgFunctions {
             class getCullDist      {};
             class broadcastStats   {};
             class toggleProtection {};
+            class protect          {};
+            class unprotect        {};
+            class isCulled         {};
+            class getStats         {};
             class initZeusHooks    {};
             class createStatusWindow {};
             class updateStatusWindow {};
