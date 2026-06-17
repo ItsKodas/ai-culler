@@ -9,7 +9,7 @@ sleep 5;
     if (_x getVariable ["AIC_waypointBaseline", -1] < 0) then {
         _x setVariable ["AIC_waypointBaseline", count (waypoints _x)];
     };
-} forEach (allGroups select { (units _x) findIf { !isPlayer _x && {_x isKindOf "CAManBase"} } != -1 });
+} forEach allGroups;
 if (AIC_debug) then { diag_log "[AIC][WP] Baseline snapshot complete"; };
 
 while {true} do {
@@ -62,5 +62,5 @@ while {true} do {
                 [(units _grp)] remoteExec ["AIC_fnc_updateUnitLabel", 0];
             };
         };
-    } forEach (allGroups select { (units _x) findIf { !isPlayer _x && {alive _x && {_x isKindOf "CAManBase"}} } != -1 });
+    } forEach allGroups;
 };
