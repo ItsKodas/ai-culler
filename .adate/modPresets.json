@@ -1,0 +1,211 @@
+[
+	{
+		"mods": [
+			{
+				"id": "steam:1808238502",
+				"displayName": "LAMBS_Suppression"
+			},
+			{
+				"id": "steam:2034363662",
+				"displayName": "Enhanced Movement Rework"
+			},
+			{
+				"id": "steam:1224892496",
+				"displayName": "Gruppe Adler Trenches"
+			},
+			{
+				"id": "steam:825172265",
+				"displayName": "Immerse"
+			},
+			{
+				"id": "steam:463939057",
+				"displayName": "ace"
+			},
+			{
+				"id": "steam:450814997",
+				"displayName": "CBA_A3"
+			},
+			{
+				"id": "steam:3407948300",
+				"displayName": "JSRS SOUNDMOD 2025"
+			},
+			{
+				"id": "steam:2513044572",
+				"displayName": "Fawks' Enhanced NVGs"
+			},
+			{
+				"id": "steam:1638341685",
+				"displayName": "DUI - Squad Radar"
+			},
+			{
+				"id": "steam:2791403093",
+				"displayName": "Better Inventory"
+			},
+			{
+				"id": "steam:2372036642",
+				"displayName": "BackpackOnChest - Redux"
+			},
+			{
+				"id": "steam:333310405",
+				"displayName": "Enhanced Movement"
+			},
+			{
+				"id": "steam:497660133",
+				"displayName": "CUP Weapons"
+			},
+			{
+				"id": "steam:497661914",
+				"displayName": "CUP Units"
+			},
+			{
+				"id": "steam:541888371",
+				"displayName": "CUP Vehicles"
+			},
+			{
+				"id": "steam:583544987",
+				"displayName": "CUP Terrains - Maps"
+			},
+			{
+				"id": "steam:1779063631",
+				"displayName": "Zeus Enhanced"
+			},
+			{
+				"id": "steam:583496184",
+				"displayName": "CUP Terrains - Core"
+			},
+			{
+				"id": "steam:894678801",
+				"displayName": "Task Force Arrowhead Radio (BETA!!!)"
+			},
+			{
+				"id": "steam:2971219389",
+				"displayName": "ADF Re-Cut [Beta]"
+			},
+			{
+				"id": "steam:2461607508",
+				"displayName": "Simple Suppress"
+			},
+			{
+				"id": "steam:1858075458",
+				"displayName": "LAMBS_Danger.fsm"
+			},
+			{
+				"id": "steam:3142300742",
+				"displayName": "TFAR Scribbles"
+			},
+			{
+				"id": "steam:2231150238",
+				"displayName": "Freestyles Crash Landing"
+			},
+			{
+				"id": "steam:2777111000",
+				"displayName": "Turret Lock"
+			},
+			{
+				"id": "steam:2480263219",
+				"displayName": "Enhanced GPS"
+			},
+			{
+				"id": "steam:2515887728",
+				"displayName": "Crows Electronic Warfare"
+			},
+			{
+				"id": "steam:1661066023",
+				"displayName": "RKSL Studios - Attachments v3.02"
+			},
+			{
+				"id": "steam:3289651152",
+				"displayName": "MTK - Faster Pistol Swap"
+			},
+			{
+				"id": "steam:2822758266",
+				"displayName": "Deformer"
+			},
+			{
+				"id": "steam:1508091616",
+				"displayName": "Metis Marker"
+			},
+			{
+				"id": "steam:1397683809",
+				"displayName": "Reduced Haze Mod v3.1"
+			},
+			{
+				"id": "steam:2467590475",
+				"displayName": "Enhanced Map Ace Version"
+			},
+			{
+				"id": "steam:2020940806",
+				"displayName": "KAT - Advanced Medical"
+			},
+			{
+				"id": "steam:1911374016",
+				"displayName": "ACE Vehicle Medical"
+			},
+			{
+				"id": "steam:893339590",
+				"displayName": "3CB BAF Weapons"
+			},
+			{
+				"id": "steam:2461917699",
+				"displayName": "[ASOT] Official Addons Mod"
+			},
+			{
+				"id": "steam:1369691841",
+				"displayName": "Community Factions Project (CFP)"
+			},
+			{
+				"id": "steam:893349825",
+				"displayName": "3CB BAF Vehicles"
+			},
+			{
+				"id": "steam:639837898",
+				"displayName": "Advanced Towing"
+			},
+			{
+				"id": "steam:1745501605",
+				"displayName": "Hatchet H-60 pack - Stable Version"
+			},
+			{
+				"id": "steam:2801005195",
+				"displayName": "Hatchet H-60 - No Over Torque"
+			},
+			{
+				"id": "steam:2941986336",
+				"displayName": "Hatchet Interaction Framework - Stable Version"
+			},
+			{
+				"id": "steam:1175642869",
+				"displayName": "HMDs - CUP"
+			},
+			{
+				"id": "steam:1388192893",
+				"displayName": "ITC Land Systems"
+			},
+			{
+				"id": "steam:2817149713",
+				"displayName": "Libertad - SA - Horse"
+			},
+			{
+				"id": "steam:3500447574",
+				"displayName": "Grunder PMC"
+			},
+			{
+				"id": "steam:2947655994",
+				"displayName": "Šumava"
+			},
+			{
+				"id": "steam:2753746058",
+				"displayName": "GX - Objects"
+			},
+			{
+				"id": "steam:3120724084",
+				"displayName": "Šumava Livonia Lighting Replacement"
+			},
+			{
+				"id": "steam:2817145194",
+				"displayName": "Libertad - SA - Core"
+			}
+		],
+		"presetName": "Operation Montage"
+	}
+]
