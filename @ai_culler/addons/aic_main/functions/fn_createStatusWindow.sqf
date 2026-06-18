@@ -252,3 +252,14 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     private _debug     = (_disp displayCtrl 9226) getVariable ["AIC_debugEnabled", AIC_debug];
     [_maxAI, _distB, _distO, _distI, _distC, _interval, _minRad, _combatRad, _debug] remoteExecCall ["AIC_fnc_applySettings", 2];
 }];
+
+// Consume backspace on the Zeus display when an edit field has focus,
+// preventing the default Zeus keybind from closing the UI mid-input.
+// DIK_BACK = 14, CT_EDIT = 2
+_display displayAddEventHandler ["KeyDown", {
+    params ["_display", "_key"];
+    if (_key != 14) exitWith { false };
+    private _focused = focusedCtrl _display;
+    if (isNull _focused) exitWith { false };
+    ctrlType _focused == 2
+}];

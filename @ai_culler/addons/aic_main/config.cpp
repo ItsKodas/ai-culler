@@ -195,6 +195,30 @@ class CfgCuratorContextActions {
     };
 };
 
+class Cfg3DEN {
+    class Object {
+        class AttributeCategories {
+            class AICuller {
+                displayName = "AI Culler";
+                collapsed = 0;
+                class Attributes {
+                    class AIC_zeusProtected {
+                        displayName = "Protected from Culler";
+                        tooltip = "This unit will never be culled or have its simulation disabled by AI Culler.";
+                        property = "AIC_zeusProtected";
+                        control = "Checkbox";
+                        defaultValue = "false";
+                        expression = "_this setVariable ['AIC_zeusProtected', _value, true]";
+                        expressionValue = "_this getVariable ['AIC_zeusProtected', false]";
+                        validate = "none";
+                        condition = "objectEditor";
+                    };
+                };
+            };
+        };
+    };
+};
+
 class CfgNotifications {
     class AIC_StateNotification {
         title = "AI Culler";

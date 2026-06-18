@@ -45,8 +45,10 @@ while {true} do {
         {_x isKindOf "CAManBase" &&
         {vehicle _x == _x &&
         {!isPlayer _x &&
+        {isNull (remoteControlled _x) &&
+        {(velocity _x select 2) > -1 &&
         {!(_x getVariable ["AIC_zeusProtected", false]) &&
-        {side _x in [west, east, resistance, civilian]}}}}}
+        {side _x in [west, east, resistance, civilian]}}}}}}
     };
 
     private _outOfRange      = [];

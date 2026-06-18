@@ -82,6 +82,7 @@ if (_enable) then {
                 for "_i" from AIC_clientCursor to (_end - 1) do {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
+                    if (!isNull (remoteControlled _unit)) then { _unit hideObject false; continue };
                     if (_inZeus) then { _unit hideObject false; continue };
                     if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
                     if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
@@ -140,6 +141,7 @@ if (_enable) then {
                 for "_i" from AIC_clientCursor to (_end - 1) do {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
+                    if (!isNull (remoteControlled _unit)) then { _unit hideObject false; continue };
                     if (_inZeus) then { _unit hideObject false; continue };
                     if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
                     if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
