@@ -92,11 +92,11 @@ if (_enable) then {
                         if ((_unit distance player) <= AIC_clientSurfaceRadius) then {
                             private _playerEye = eyePos player;
                             private _unitEye   = eyePos _unit;
-                            private _hits      = lineIntersectsSurfaces [_playerEye, _unitEye, player, _unit, true, 1, "FIRE"];
+                            private _hits      = lineIntersectsSurfaces [_playerEye, _unitEye, player, _unit, true, 1, "VIEW"];
                             private _blocked   = (_hits findIf {
                                 private _obj = _x select 2;
                                 private _type = toLower (typeOf _obj);
-                                isNull _obj || { !(_obj isKindOf "Tree") && { !(_obj isKindOf "Bush") && { ((_type find "net") == -1) && { (_type find "bag") == -1 } && { (_type find "bunker") == -1 } } } }
+                                !isNull _obj && { ((_type find "net") == -1) && { (_type find "bag") == -1 } && { (_type find "bunker") == -1 } }
                             }) != -1;
                             if (_blocked && _ads) then {
                                 if ((vectorNormalized (_unitEye vectorDiff _playerEye) vectorDotProduct _lookDir) >= 0.866) then { _blocked = false };
@@ -154,11 +154,11 @@ if (_enable) then {
                         if ((_unit distance player) <= AIC_clientSurfaceRadius) then {
                             private _playerEye = eyePos player;
                             private _unitEye   = eyePos _unit;
-                            private _hits      = lineIntersectsSurfaces [_playerEye, _unitEye, player, _unit, true, 1, "FIRE"];
+                            private _hits      = lineIntersectsSurfaces [_playerEye, _unitEye, player, _unit, true, 1, "VIEW"];
                             private _blocked   = (_hits findIf {
                                 private _obj = _x select 2;
                                 private _type = toLower (typeOf _obj);
-                                isNull _obj || { !(_obj isKindOf "Tree") && { !(_obj isKindOf "Bush") && { ((_type find "net") == -1) && { (_type find "bag") == -1 } && { (_type find "bunker") == -1 } } } }
+                                !isNull _obj && { ((_type find "net") == -1) && { (_type find "bag") == -1 } && { (_type find "bunker") == -1 } }
                             }) != -1;
                             if (_blocked && _ads) then {
                                 if ((vectorNormalized (_unitEye vectorDiff _playerEye) vectorDotProduct _lookDir) >= 0.866) then { _blocked = false };
