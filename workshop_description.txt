@@ -49,3 +49,12 @@ All settings are exposed under [b]Configure → Addon Options[/b] and persist be
 [url=https://github.com/ItsKodas/ai-culler]github.com/ItsKodas/ai-culler[/url]
 
 Feel free to fork the repo :)
+
+[h1]A note on development[/h1]
+This is my first mod — I have no background in Arma modding, only web development and system administration. I just wanted to build something genuinely useful for the community. [b]AgentDove[/b] deserves a huge amount of credit here — his deep knowledge of SQF and Arma's engine internals fixed and improved a significant number of issues, and the performance optimisations in particular are largely his work.
+
+This mod was also built in collaboration with [b]Claude[/b] (Anthropic's AI assistant). The design, direction, testing, and all decisions about what to build were mine — Claude assisted with implementation, debugging, and working through the technical details of SQF and Arma's engine behaviour. I wanted to be upfront about that rather than take sole credit for the code.
+
+[h1]ASOT - The Community this was built for[/h1]
+Oceania's Largest Milsim Unit since 2020
+https://discord.gg/asot
