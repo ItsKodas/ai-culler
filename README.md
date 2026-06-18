@@ -247,6 +247,7 @@ Open **Configure → Addon Options → AI Culler - Client** to set per-client pr
 | 3D Label Draw Distance | 800m | Maximum camera distance at which 3D labels are rendered |
 | Safe Radius | 150m | AI within this distance are always rendered regardless of LOS |
 | Surface LOS Radius | 600m | Within this distance, full surface intersection is used in addition to terrain LOS. Beyond it, terrain-only. |
+| Corpse Hide Radius | 300m | Dead AI beyond this distance are hidden. Set to 0 to always show corpses. |
 
 **Debug HUD** (`AIC_clientDebug`) is server-enforced (`isGlobal = 1`) — the server admin controls it and the value is broadcast to all clients. When enabled it activates the renderer overlay on every connected player simultaneously. It is grouped under the **AI Culler - Client** category but only editable from the server side.
 
@@ -336,6 +337,7 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 - `AIC_clientSafeRadius` default raised from 75m to 150m
 - Zeus camera bypass now uses `findDisplay 312` (curator display) — units in the sweep queue are unhidden as the sweep processes them while Zeus is open
 - Changed `AIC_showNotifications` default to `false` — enable/disable popups are now opt-in
+- Added `AIC_clientCorpseRadius` (default 300m) — dead AI beyond this distance are hidden without an LOS check, purely by distance. Set to 0 to always show corpses. Configurable per-client in Addon Options
 
 ### v3.6.0
 - Added public scripting API: `AIC_fnc_protect`, `AIC_fnc_unprotect`, `AIC_fnc_isCulled`, `AIC_fnc_getStats` — mission makers and mod authors can now protect/unprotect units and query culler state without touching internal variables. Server-mutating calls auto-forward from client machines via `remoteExec`. See [docs/API.md](docs/API.md)
