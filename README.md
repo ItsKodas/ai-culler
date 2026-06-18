@@ -254,10 +254,8 @@ Open **Configure → Addon Options → AI Culler - Client** to set per-client pr
 
 `AIC_clientRadius` is not a static default. At mission start it is read from the player's view distance and kept in sync every 30 seconds to track mid-mission changes:
 
-- **With ACE3** — reads `ace_viewdistance_viewDistanceOnFoot`; falls back to `objectViewDistance` if that variable is not set
-- **Without ACE3** — reads `objectViewDistance` directly
-
-`objectViewDistance` is used rather than overall view distance because units beyond the object render distance are not drawn by the engine — running LOS checks on them would be wasted work. This keeps the queue tight and aligned with what Arma is actually rendering.
+- **With ACE3** — reads `ace_viewdistance_viewDistanceOnFoot`; falls back to Arma's native `viewDistance` if that variable is not set
+- **Without ACE3** — reads Arma's native `viewDistance` directly
 
 ---
 
@@ -338,7 +336,6 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 - `AIC_clientSafeRadius` default raised from 75m to 150m
 - Zeus camera bypass now uses `findDisplay 312` (curator display) — units in the sweep queue are unhidden as the sweep processes them while Zeus is open
 - Changed `AIC_showNotifications` default to `false` — enable/disable popups are now opt-in
-- `AIC_clientRadius` now tracks `objectViewDistance` instead of overall view distance — units beyond the object render distance aren't drawn by the engine, so LOS checks on them were wasted; the queue is now tight to what Arma is actually rendering
 
 ### v3.6.0
 - Added public scripting API: `AIC_fnc_protect`, `AIC_fnc_unprotect`, `AIC_fnc_isCulled`, `AIC_fnc_getStats` — mission makers and mod authors can now protect/unprotect units and query culler state without touching internal variables. Server-mutating calls auto-forward from client machines via `remoteExec`. See [docs/API.md](docs/API.md)
