@@ -12,10 +12,10 @@ class EditorData
 	};
 	class Camera
 	{
-		pos[]={2389.9712,39.035957,1126.6736};
-		dir[]={0.72865939,-0.66063786,-0.18060458};
-		up[]={0.64123762,0.75070155,-0.15893669};
-		aside[]={-0.24058005,-7.9671736e-08,-0.97063112};
+		pos[]={2566.1394,159.83429,1515.8555};
+		dir[]={0.38416138,-0.47707769,0.79046363};
+		up[]={0.20853752,0.87885696,0.42909351};
+		aside[]={0.89941502,-3.0594674e-07,-0.43711182};
 	};
 };
 binarizationWanted=0;
@@ -7311,6 +7311,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7322,7 +7335,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item1
@@ -7344,6 +7357,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7355,7 +7381,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item2
@@ -7378,6 +7404,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7389,7 +7428,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item3
@@ -7411,6 +7450,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7422,7 +7474,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item4
@@ -7444,6 +7496,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7455,7 +7520,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item5
@@ -7478,6 +7543,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7489,7 +7567,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item6
@@ -7511,6 +7589,19 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute1
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7522,7 +7613,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=2;
 					};
 				};
 				class Item7
@@ -7530,7 +7621,7 @@ class Mission
 					dataType="Object";
 					class PositionInfo
 					{
-						position[]={2575.7993,122.35069,1558.0289};
+						position[]={2575.7991,122.35068,1558.0291};
 					};
 					side="East";
 					flags=5;
@@ -7540,9 +7631,75 @@ class Mission
 					};
 					id=236;
 					type="O_medic_F";
+					atlOffset=-7.6293945e-06;
 					class CustomAttributes
 					{
 						class Attribute0
+						{
+							property="mrh_message_codeToExec";
+							expression="_this setVariable ['MRH_message_codeToExecute',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="";
+								};
+							};
+						};
+						class Attribute1
+						{
+							property="mrh_textMess";
+							expression="_this setVariable ['MRH_message_conversationText',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="";
+								};
+							};
+						};
+						class Attribute2
+						{
+							property="speaker";
+							expression="_this setspeaker _value;";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="Male02PER";
+								};
+							};
+						};
+						class Attribute3
+						{
+							property="pitch";
+							expression="_this setpitch _value;";
+							class Value
+							{
+								class data
+								{
+									singleType="SCALAR";
+									value=0.98000002;
+								};
+							};
+						};
+						class Attribute4
+						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute5
 						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
@@ -7555,7 +7712,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=6;
 					};
 				};
 			};
@@ -7776,7 +7933,7 @@ class Mission
 					dataType="Object";
 					class PositionInfo
 					{
-						position[]={2588.593,126.29895,1560.5924};
+						position[]={2588.593,126.29875,1560.592};
 					};
 					side="East";
 					flags=5;
@@ -7790,6 +7947,71 @@ class Mission
 					{
 						class Attribute0
 						{
+							property="mrh_message_codeToExec";
+							expression="_this setVariable ['MRH_message_codeToExecute',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="";
+								};
+							};
+						};
+						class Attribute1
+						{
+							property="mrh_textMess";
+							expression="_this setVariable ['MRH_message_conversationText',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="";
+								};
+							};
+						};
+						class Attribute2
+						{
+							property="speaker";
+							expression="_this setspeaker _value;";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="Male03PER";
+								};
+							};
+						};
+						class Attribute3
+						{
+							property="pitch";
+							expression="_this setpitch _value;";
+							class Value
+							{
+								class data
+								{
+									singleType="SCALAR";
+									value=0.94999999;
+								};
+							};
+						};
+						class Attribute4
+						{
+							property="mrh_message_passedParams";
+							expression="_this setVariable ['MRH_message_parametersPassed',_value,true]";
+							class Value
+							{
+								class data
+								{
+									singleType="STRING";
+									value="[]";
+								};
+							};
+						};
+						class Attribute5
+						{
 							property="ADP_PID";
 							expression="[_this, _value] call ADP_fnc_setPID;";
 							class Value
@@ -7801,7 +8023,7 @@ class Mission
 								};
 							};
 						};
-						nAttributes=1;
+						nAttributes=6;
 					};
 				};
 				class Item7

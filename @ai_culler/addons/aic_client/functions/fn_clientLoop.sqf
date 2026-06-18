@@ -63,6 +63,10 @@ if (_enable) then {
                 if (diag_tickTime - _lastRun < 0.05) exitWith {};
                 _args set [0, diag_tickTime];
 
+                if (!isNull (remoteControlled player)) exitWith {
+                    { _x hideObject false } forEach AIC_clientQueue;
+                };
+
                 if (AIC_clientCursor >= count AIC_clientQueue) then {
                     AIC_clientQueue = (allUnits + allDeadMen) select {
                         !isPlayer _x && { _x isKindOf "CAManBase" && { vehicle _x == _x && { (_x distance player) < AIC_clientRadius } } }
@@ -119,6 +123,10 @@ if (_enable) then {
 
                 if (diag_tickTime - _lastRun < 0.05) exitWith {};
                 _args set [0, diag_tickTime];
+
+                if (!isNull (remoteControlled player)) exitWith {
+                    { _x hideObject false } forEach AIC_clientQueue;
+                };
 
                 if (AIC_clientCursor >= count AIC_clientQueue) then {
                     private _allUnitsFr = allUnits + allDeadMen + (agents apply {agent _x});

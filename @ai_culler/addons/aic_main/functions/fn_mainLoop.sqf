@@ -105,9 +105,12 @@ while {true} do {
                     private _hasLOS = (_refPoints findIf {
                         private _eyePos = _x select 0;
                         private _player = _x select 1;
-                        if (terrainIntersectASL [_eyePos, _unitEyePos]) exitWith { false };
-                        private _hits = lineIntersectsSurfaces [_eyePos, _unitEyePos, _player, _unit, true, 1, "VIEW"];
-                        (_hits findIf { !isNull (_x select 2) }) == -1
+                        if (terrainIntersectASL [_eyePos, _unitEyePos]) then {
+                            false
+                        } else {
+                            private _hits = lineIntersectsSurfaces [_eyePos, _unitEyePos, _player, _unit, true, 1, "VIEW"];
+                            (_hits findIf { !isNull (_x select 2) }) == -1
+                        }
                     }) != -1;
 
                     if (_hasLOS) then {

@@ -4,12 +4,15 @@
 
 | Variable | Default | Description |
 |---|---|---|
-| `AIC_maxActiveAI` | 80 | Hard cap on simultaneously active AI |
-| `AIC_distOpfor` | 2000m | Cull distance for Opfor (east) |
-| `AIC_distIndependent` | 800m | Cull distance for Independent |
-| `AIC_distCivilian` | 400m | Cull distance for Civilians |
+| `AIC_maxActiveAI` | 150 | Hard cap on simultaneously active AI |
+| `AIC_distBlufor` | 2000m | Cull distance for BLUFOR (west) |
+| `AIC_distOpfor` | 2000m | Cull distance for OPFOR (east) |
+| `AIC_distIndependent` | 2000m | Cull distance for Independent |
+| `AIC_distCivilian` | 500m | Cull distance for Civilians |
 | `AIC_checkInterval` | 5s | How often the culler runs (seconds) |
-| `AIC_debug` | true | RPT logging — disable for live ops |
+| `AIC_minActiveRadius` | 200m | Units within this radius are always active |
+| `AIC_combatRadius` | 400m | Radius for AI vs AI combat detection |
+| `AIC_debug` | false | RPT logging — enable for diagnostics only |
 
 ---
 

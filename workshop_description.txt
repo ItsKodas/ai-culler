@@ -7,16 +7,16 @@ A two-part performance mod for Arma 3 that tackles both the server-side simulati
 [b]Client:[/b] Arma 3's renderer has no robust occlusion culling, so looking toward a large AI force drops FPS even when every unit is behind a building or hill.
 
 [h1]The Solution[/h1]
-[b]aic_main[/b] (server + Zeus) caps the number of actively-simulating AI and prioritises units by proximity and line of sight. Vehicles are never culled. Protected, in-combat, and Zeus-ordered units are always active regardless of distance.
+[b]aic_main[/b] (server + Zeus) caps the number of actively-simulating AI and prioritises units by proximity and line of sight. Vehicles are never culled. Protected, in-combat, and Zeus-ordered units are always active regardless of distance. Units in free-fall or under a parachute are excluded, and any unit being remote controlled via Zeus is never culled either.
 
-[b]aic_client[/b] (every player client) hides occluded AI models via 'hideObject', removing them from each player's render pipeline. It uses a two-tier LOS check: a fast terrain-only raycast runs first, and a full surface intersection check (catching buildings and walls) runs only for units within 600m. Camo nets, sandbags, open bunker structures, trees, and bushes are excluded from occlusion so units stay visible through them. Glass and windows pass through naturally. Units within 150m are always rendered to prevent pop-in. An ADS-cone bypass keeps units visible while you're aiming at them. While Zeus is open, all units are visible. The occlusion radius is automatically read from each player's view distance (ACE3 or native) and kept in sync throughout the mission.
+[b]aic_client[/b] (every player client) hides occluded AI models via 'hideObject', removing them from each player's render pipeline. It uses a two-tier LOS check: a fast terrain-only raycast runs first, and a full surface intersection check (catching buildings and walls) runs only for units within 600m. Camo nets, sandbags, open bunker structures, trees, and bushes are excluded from occlusion so units stay visible through them. Glass and windows pass through naturally. Units within 150m are always rendered to prevent pop-in. An ADS-cone bypass keeps units visible while you're aiming at them. While Zeus is open, or while you're remote controlling a unit, all units stay visible. The occlusion radius is automatically read from each player's view distance (ACE3 or native) and kept in sync throughout the mission.
 
 [i]Supported on singleplayer and dedicated server MP only. Listen server (host-client) is not supported.[/i]
 
 Both addons ship in one mod, the right code runs on the right machine automatically.
 
 [h1]Live Zeus Control[/h1]
-A status window opens automatically when Zeus is active. Adjust max active AI, per-faction cull distances, check interval, and combat detection radius on the fly, changes broadcast to the server instantly. A live FPS sparkline tracks server performance over the last 88 seconds with current, average, min, and max in the title bar. No restart, no rebuild.
+A status window opens automatically when Zeus is active. Adjust max active AI, per-faction cull distances, check interval, and combat detection radius on the fly, changes broadcast to the server instantly. The Active count is color-coded so you can see at a glance how close you are to the cap. A live FPS sparkline tracks server performance over the last 88 seconds with current, average, min, and max in the title bar. No restart, no rebuild.
 
 [h1]CBA Addon Options[/h1]
 All settings are exposed under [b]Configure > Addon Options[/b] and persist between sessions. Server settings (cull distances, AI cap, intervals) are server-enforced and broadcast to all clients. Client settings (label display, safe radius, surface LOS radius, enable toggle) are per-player. Requires CBA_A3, falls back to hard-coded defaults without it.
@@ -27,8 +27,10 @@ All settings are exposed under [b]Configure > Addon Options[/b] and persist betw
 [*] AI-vs-AI combat auto-activation so distant firefights don't freeze
 [*] Zeus waypoint override, assigned groups activate regardless of player distance
 [*] Right-click [b]Toggle Culler Protection[/b] context action
+[*] Eden Editor [b]Protected from Culler[/b] checkbox in unit placement, no scripting needed
 [*] ZEN Enhanced Zeus context-menu integration
 [*] 3D floating labels above managed units showing [b]Protected[/b], [b]Culled[/b], or [b]Override[/b] state
+[*] Color-coded Active count in Zeus, so you know at a glance how close you are to the cap
 [*] Live server FPS sparkline graph in Zeus
 [*] Client renderer debug HUD (server-controlled, activates on all clients simultaneously)
 [*] No mission changes required, no 'init.sqf' entry
@@ -45,16 +47,15 @@ All settings are exposed under [b]Configure > Addon Options[/b] and persist betw
 [b]Tested:[/b] CBA_A3, LAMBS Danger, Headless Clients, Civilian Presence Module, Zeus / Curator, ACE3 (view distance auto-sync), ZEN Enhanced Zeus
 [b]Untested:[/b] Vcom AI, may conflict
 
-[h1]Source & full documentation[/h1]
-[url=https://github.com/ItsKodas/ai-culler]github.com/ItsKodas/ai-culler[/url]
-
-Feel free to fork the repo :)
-
 [h1]A note on development[/h1]
 This is my first mod, I have no background in Arma modding at all, just web development and system administration. I wanted to build something genuinely useful for the community so I gave it a shot. [b]AgentDove[/b] deserves a huge amount of credit here, his deep knowledge of SQF and Arma's engine internals fixed and improved a significant number of issues, and the performance optimisations in particular are largely his work.
-
 This mod was also built in collaboration with [b]Claude[/b] (Anthropic's AI assistant). The design, direction, testing, and all decisions about what to build were mine, Claude assisted with implementation, debugging, and working through the technical details of SQF and Arma's engine behaviour. I wanted to be upfront about that rather than take sole credit for the code.
 
 [h1]ASOT - The Community this was built for[/h1]
 Oceania's Largest Milsim Unit since 2020
 https://discord.gg/asot
+
+[h1]Source & full documentation[/h1]
+[url=https://github.com/ItsKodas/ai-culler]github.com/ItsKodas/ai-culler[/url]
+
+Feel free to fork the repo :)

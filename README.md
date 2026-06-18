@@ -48,7 +48,7 @@ Each unit is classified into one of five states every tick:
 | **Active (No-LOS)** | In range but no LOS | Active only if under cap |
 | **Culled** | Beyond faction cull distance | Always disabled |
 
-When a group is in **Override** or any unit in range is engaged in **AI vs AI combat**, simulation is forced on regardless of player proximity or the active unit cap. Vehicles are never culled.
+When a group is in **Override** or any unit in range is engaged in **AI vs AI combat**, simulation is forced on regardless of player proximity or the active unit cap. Vehicles are never culled. Units currently being remote controlled by a Zeus player and units in free-fall or under a parachute are also excluded from the managed pool and their simulation is never disabled.
 
 ### Configuration
 
@@ -122,7 +122,7 @@ Activation latency (how long before a newly relevant unit gets enabled) is the o
 
 ### Status window
 
-Opens automatically when Zeus is active. The left column shows live culling stats; the right column shows server-wide counts and FPS. Both columns update on every tick — even when the culler is disabled.
+Opens automatically when Zeus is active. The left column shows live culling stats; the right column shows server-wide counts and FPS. Both columns update on every tick — even when the culler is disabled. The **Active** count is color-coded: green when below cap, yellow at exactly cap, orange up to 2× cap, and flashing red above 2× cap.
 
 | Left column | Description |
 |---|---|
@@ -171,6 +171,10 @@ While Zeus is open, a floating label is drawn above each managed unit within `AI
 
 If **ZEN Enhanced Zeus** is loaded, a **Toggle Culler Protection** option appears in the right-click context menu for any AI infantry.
 
+### Eden Editor protection attribute
+
+In the Eden Editor, every unit's **Object: States** attribute panel includes a **Protected from Culler** checkbox. Enabling it sets `AIC_zeusProtected` at mission start without any scripting — units flagged this way are excluded from culling for the entire mission. This is equivalent to calling `AIC_fnc_protect` from a trigger or init field, but persists across respawns and requires no code.
+
 ---
 
 ## Client-Side Renderer (`aic_client`)
@@ -192,15 +196,16 @@ Each client runs a two-tier LOS check between the player's eye position and ever
 
 **Tier 1 — Terrain (always):** `terrainIntersectASL` is a fast terrain-only raycast. If terrain blocks the line, the unit is hidden immediately and tier 2 is skipped. This cheap early-out catches the majority of cases.
 
-**Tier 2 — Surface intersection (within `AIC_clientSurfaceRadius`):** For units closer than 600m that passed the terrain check, `lineIntersectsSurfaces` is run against the Fire Geometry LOD. This catches buildings, walls, and solid structures. The following hit types are excluded and do not count as occlusion:
-- Trees (`isKindOf "Tree"`) and bushes (`isKindOf "Bush"`)
+**Tier 2 — Surface intersection (within `AIC_clientSurfaceRadius`):** For units closer than 600m that passed the terrain check, `lineIntersectsSurfaces` is run against the View Geometry LOD. This catches buildings, walls, and solid structures. The following hit types are excluded and do not count as occlusion:
+- Terrain-baked objects — trees, rocks, and other objects embedded in the terrain return `objNull` from the surface check and are treated as non-blocking
 - Objects with `"net"`, `"bag"`, or `"bunker"` in their class name (camo nets, sandbags, open bunker structures)
-- Glass and windows — Fire Geometry does not include transparent surfaces, so units remain visible through them
+- Glass and windows — View Geometry does not include transparent surfaces, so units remain visible through them
 
 The check is intentionally permissive:
 - **Safe radius** — units within `AIC_clientSafeRadius` (default 150m) are always rendered regardless of LOS, preventing pop-in as AI close distance
 - **ADS cone** — when the player is holding RMB (precision aim) or looking through a weapon optic, AI within ~30° of the camera's aim direction are force-rendered even if occluded. This prevents units from vanishing as you peek around corners to engage them
 - **Zeus camera** — while the Zeus interface is open, no units are hidden. All previously hidden units are restored as the sweep cycles through them so the Zeus player sees the full battlefield
+- **Remote control** — while the local player is remote controlling a unit via Zeus, occlusion is suspended and all units in the sweep queue are shown
 
 `hideObject` is client-local — it affects only the machine running the check and does not change AI state or hitboxes for any other player.
 
@@ -326,6 +331,19 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 ---
 
 ## Changelog
+
+### v3.8.0
+- Switched surface intersection from `"FIRE"` LOD to `"VIEW"` LOD in both `aic_client` and `aic_main` — View Geometry is semantically correct for visual occlusion; Fire LOD is ballistic penetration geometry and produced incorrect results for many objects
+- Fixed terrain-baked objects (trees, rocks) incorrectly occluding units — `lineIntersectsSurfaces` returns `objNull` for objects baked into the terrain; null refs are now treated as non-blocking, removing the need for `isKindOf "Tree"/"Bush"` guards
+- Fixed remote-controlled units (Zeus RC) being hidden by `aic_client` — any unit currently being remote controlled by a player is always shown regardless of LOS result
+- Fixed all units near a remote-controlling player being hidden — `aic_client` now detects when the local player is performing RC (`remoteControlled player` is non-null) and suspends occlusion entirely for that tick
+- Fixed remote-controlled units being culled by `aic_main` — units with an active remote controller are excluded from the managed pool and their simulation is never disabled
+- Fixed parachuting and free-falling units being culled by `aic_main` — units with a Z-velocity below -1 m/s are excluded from the managed pool, covering both units inside a parachute vehicle and the brief free-fall window between exiting an aircraft and parachute deployment
+- Fixed backspace closing the Zeus UI when typing in configuration edit boxes — the Zeus display now intercepts the backspace key event and consumes it only when an edit field has keyboard focus, preventing the default Zeus close key binding from triggering mid-input
+- Fixed "Generic error in expression" in `fn_mainLoop.sqf` LOS check — `exitWith { false }` inside `findIf` exits the entire `findIf` and returns a Boolean instead of an index, causing a type mismatch on `!= -1`; replaced with `if...then...else`
+- Added terrain pre-check (`terrainIntersectASL`) to `aic_main`'s per-player LOS loop — cheap early-out consistent with `aic_client`'s two-tier approach; skips the expensive `lineIntersectsSurfaces` call when terrain already blocks the line
+- Added color-coded Active count in the Zeus status window — green when below cap, yellow at exactly cap, orange up to 2× cap, flashing red above 2× cap
+- Added **Protected from Culler** checkbox to Eden Editor unit attributes in the existing **Object: States** category — sets `AIC_zeusProtected` at mission start via the attribute expression, no scripting required
 
 ### v3.7.0
 - Rewrote `aic_client` loop with separate SP and MP paths — singleplayer uses the local AI pool; dedicated server MP filters to remote-only units. Listen server (host-client) is explicitly unsupported and documented
