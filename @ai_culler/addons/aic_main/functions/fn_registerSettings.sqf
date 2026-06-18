@@ -180,6 +180,16 @@ if (isNil "CBA_fnc_addSetting") exitWith { diag_log "[AIC] fn_registerSettings: 
 ] call CBA_fnc_addSetting;
 
 [
+    "AIC_clientCorpseRadius",
+    "SLIDER",
+    ["Corpse Hide Radius (m)", "Dead AI beyond this distance are hidden. Set to 0 to always show corpses."],
+    "AI Culler - Client",
+    [0, 1000, 300, 0],
+    0,
+    {}
+] call CBA_fnc_addSetting;
+
+[
     "AIC_clientDebug",
     "CHECKBOX",
     ["Debug HUD", "Show the client renderer debug overlay on all clients."],

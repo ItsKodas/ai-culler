@@ -4,6 +4,7 @@ if (!hasInterface) exitWith {};
 if (isNil "AIC_clientEnabled")       then { AIC_clientEnabled       = true  };
 if (isNil "AIC_clientSafeRadius")    then { AIC_clientSafeRadius    = 150   };
 if (isNil "AIC_clientSurfaceRadius") then { AIC_clientSurfaceRadius = 600   };
+if (isNil "AIC_clientCorpseRadius")  then { AIC_clientCorpseRadius  = 300   };
 if (isNil "AIC_clientDebug")         then { AIC_clientDebug         = false };
 AIC_clientHidden     = [];
 AIC_clientADS        = false;

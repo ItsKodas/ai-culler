@@ -83,6 +83,7 @@ if (_enable) then {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
                     if (_inZeus) then { _unit hideObject false; continue };
+                    if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
                     if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
                     private _unitAbove = getPosASL _unit vectorAdd [0, 0, 3];
                     if (terrainIntersectASL [_localPlayerPos, _unitAbove]) then {
@@ -140,6 +141,7 @@ if (_enable) then {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
                     if (_inZeus) then { _unit hideObject false; continue };
+                    if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
                     if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
                     private _unitAbove = getPosASL _unit vectorAdd [0, 0, 3];
                     private _hostileAI = _localAI select { [side group _x, side group _unit] call BIS_fnc_sideIsEnemy };
