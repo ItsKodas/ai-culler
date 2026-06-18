@@ -198,9 +198,7 @@ class CfgCuratorContextActions {
 class Cfg3DEN {
     class Object {
         class AttributeCategories {
-            class AICuller {
-                displayName = "AI Culler";
-                collapsed = 0;
+            class States {
                 class Attributes {
                     class AIC_zeusProtected {
                         displayName = "Protected from Culler";
