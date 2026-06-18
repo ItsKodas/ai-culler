@@ -5,6 +5,11 @@ diag_log "[AIC] Starting culler loop";
 while {true} do {
     private _allUnitsRaw = allUnits;
 
+    // Re-enable simulation on any units that died while culled — allUnits excludes dead units
+    // so they would otherwise remain permanently disabled
+    private _deadCulled = allDeadMen select { _x getVariable ["AIC_disabled", false] };
+    if (_deadCulled isNotEqualTo []) then { [_deadCulled, true] call AIC_fnc_setSimulation };
+
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
         private _toEnable = _allUnitsRaw select { _x getVariable ["AIC_disabled", false] };
