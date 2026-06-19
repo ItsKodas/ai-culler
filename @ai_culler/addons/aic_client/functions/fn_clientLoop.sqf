@@ -7,6 +7,22 @@ params [["_enable", true]];
 
 private _isSP = !isMultiplayer;
 
+// Only reveal a unit if aic_client was the one that hid it. This prevents us from
+// calling hideObject false on units hidden by other mods (e.g. Hide Zeus module),
+// which would override their hideObjectGlobal on this client.
+private _fnReveal = {
+    params ["_u"];
+    if (_u getVariable ["AIC_clientHid", false]) then {
+        _u hideObject false;
+        _u setVariable ["AIC_clientHid", false];
+    };
+};
+private _fnHide = {
+    params ["_u"];
+    _u hideObject true;
+    _u setVariable ["AIC_clientHid", true];
+};
+
 // Standalone HUD PFH — runs regardless of main loop state
 private _fnStartHud = {
     if (!isNil "AIC_clientHudPFH") exitWith {};
@@ -64,7 +80,7 @@ if (_enable) then {
                 _args set [0, diag_tickTime];
 
                 if (!isNull (remoteControlled player)) exitWith {
-                    { _x hideObject false } forEach AIC_clientQueue;
+                    { [_x] call _fnReveal } forEach AIC_clientQueue;
                 };
 
                 if (AIC_clientCursor >= count AIC_clientQueue) then {
@@ -86,13 +102,17 @@ if (_enable) then {
                 for "_i" from AIC_clientCursor to (_end - 1) do {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
-                    if (!isNull (remoteControlled _unit)) then { _unit hideObject false; continue };
-                    if (_inZeus) then { _unit hideObject false; continue };
-                    if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
-                    if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
+                    if (!isNull (remoteControlled _unit)) then { [_unit] call _fnReveal; continue };
+                    if (_inZeus) then { [_unit] call _fnReveal; continue };
+                    if (!alive _unit) then {
+                        private _shouldHide = AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius };
+                        if (_shouldHide) then { [_unit] call _fnHide } else { [_unit] call _fnReveal };
+                        continue
+                    };
+                    if ((_unit distance player) <= AIC_clientSafeRadius) then { [_unit] call _fnReveal; continue };
                     private _unitAbove = getPosASL _unit vectorAdd [0, 0, 3];
                     if (terrainIntersectASL [_localPlayerPos, _unitAbove]) then {
-                        _unit hideObject true;
+                        [_unit] call _fnHide;
                     } else {
                         if ((_unit distance player) <= AIC_clientSurfaceRadius) then {
                             private _playerEye = eyePos player;
@@ -106,9 +126,9 @@ if (_enable) then {
                             if (_blocked && _ads) then {
                                 if ((vectorNormalized (_unitEye vectorDiff _playerEye) vectorDotProduct _lookDir) >= 0.866) then { _blocked = false };
                             };
-                            _unit hideObject _blocked;
+                            if (_blocked) then { [_unit] call _fnHide } else { [_unit] call _fnReveal };
                         } else {
-                            _unit hideObject false;
+                            [_unit] call _fnReveal;
                         };
                     };
                 };
@@ -125,7 +145,7 @@ if (_enable) then {
                 _args set [0, diag_tickTime];
 
                 if (!isNull (remoteControlled player)) exitWith {
-                    { _x hideObject false } forEach AIC_clientQueue;
+                    { [_x] call _fnReveal } forEach AIC_clientQueue;
                 };
 
                 if (AIC_clientCursor >= count AIC_clientQueue) then {
@@ -149,17 +169,21 @@ if (_enable) then {
                 for "_i" from AIC_clientCursor to (_end - 1) do {
                     private _unit = AIC_clientQueue select _i;
                     if (isNull _unit) then { continue };
-                    if (!isNull (remoteControlled _unit)) then { _unit hideObject false; continue };
-                    if (_inZeus) then { _unit hideObject false; continue };
-                    if (!alive _unit) then { _unit hideObject (AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius }); continue };
-                    if ((_unit distance player) <= AIC_clientSafeRadius) then { _unit hideObject false; continue };
+                    if (!isNull (remoteControlled _unit)) then { [_unit] call _fnReveal; continue };
+                    if (_inZeus) then { [_unit] call _fnReveal; continue };
+                    if (!alive _unit) then {
+                        private _shouldHide = AIC_clientCorpseRadius > 0 && { (_unit distance player) > AIC_clientCorpseRadius };
+                        if (_shouldHide) then { [_unit] call _fnHide } else { [_unit] call _fnReveal };
+                        continue
+                    };
+                    if ((_unit distance player) <= AIC_clientSafeRadius) then { [_unit] call _fnReveal; continue };
                     private _unitAbove = getPosASL _unit vectorAdd [0, 0, 3];
                     private _hostileAI = _localAI select { [side group _x, side group _unit] call BIS_fnc_sideIsEnemy };
                     if ((_hostileAI findIf { !terrainIntersectASL [getPosASL _x vectorAdd [0,0,3], _unitAbove] }) != -1) then {
-                        _unit hideObject false; continue;
+                        [_unit] call _fnReveal; continue;
                     };
                     if (terrainIntersectASL [_localPlayerPos, _unitAbove]) then {
-                        _unit hideObject true;
+                        [_unit] call _fnHide;
                     } else {
                         if ((_unit distance player) <= AIC_clientSurfaceRadius) then {
                             private _playerEye = eyePos player;
@@ -173,9 +197,9 @@ if (_enable) then {
                             if (_blocked && _ads) then {
                                 if ((vectorNormalized (_unitEye vectorDiff _playerEye) vectorDotProduct _lookDir) >= 0.866) then { _blocked = false };
                             };
-                            _unit hideObject _blocked;
+                            if (_blocked) then { [_unit] call _fnHide } else { [_unit] call _fnReveal };
                         } else {
-                            _unit hideObject false;
+                            [_unit] call _fnReveal;
                         };
                     };
                 };
@@ -194,7 +218,7 @@ if (_enable) then {
     [AIC_clientPFH] call CBA_fnc_removePerFrameHandler;
     AIC_clientPFH = nil;
 
-    { if (!isNull _x) then { _x hideObject false } } forEach AIC_clientQueue;
+    { if (!isNull _x) then { [_x] call _fnReveal } } forEach AIC_clientQueue;
     AIC_clientQueue     = [];
     AIC_clientCursor    = 0;
     AIC_clientBatchSize = 0;

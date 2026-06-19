@@ -344,6 +344,7 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 - Added terrain pre-check (`terrainIntersectASL`) to `aic_main`'s per-player LOS loop — cheap early-out consistent with `aic_client`'s two-tier approach; skips the expensive `lineIntersectsSurfaces` call when terrain already blocks the line
 - Added color-coded Active count in the Zeus status window — green when below cap, yellow at exactly cap, orange up to 2× cap, flashing red above 2× cap
 - Added **Protected from Culler** checkbox to Eden Editor unit attributes in the existing **Object: States** category — sets `AIC_zeusProtected` at mission start via the attribute expression, no scripting required
+- Fixed conflict with the Hide Zeus module — `aic_client` was calling `hideObject false` on any visible unit, overriding `hideObjectGlobal` set by other modules and making the Zeus player visible to other players. The renderer now tracks which units it hid itself (`AIC_clientHid`) and only reveals those, leaving externally hidden units untouched
 
 ### v3.7.0
 - Rewrote `aic_client` loop with separate SP and MP paths — singleplayer uses the local AI pool; dedicated server MP filters to remote-only units. Listen server (host-client) is explicitly unsupported and documented
