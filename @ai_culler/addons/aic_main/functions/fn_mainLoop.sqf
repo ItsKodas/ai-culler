@@ -82,9 +82,16 @@ while {true} do {
                 alive _x && {!isPlayer _x && {side _x != civilian &&
                 {(side _x getFriend side _unit) < 0.6}}}
             };
-            if (_combatEnemies isNotEqualTo []) then {
+            private _combatVehicles = _unit nearEntities [["LandVehicle", "Air", "Ship"], AIC_combatRadius] select {
+                alive _x && {
+                    private _cmdr = effectiveCommander _x;
+                    !isNull _cmdr && { (side _cmdr getFriend side _unit) < 0.6 }
+                }
+            };
+            if (_combatEnemies isNotEqualTo [] || { _combatVehicles isNotEqualTo [] }) then {
                 _inCombat = true;
                 { _forceActiveGroups pushBackUnique (group _x) } forEach _combatEnemies;
+                { _forceActiveGroups pushBackUnique (group (effectiveCommander _x)) } forEach _combatVehicles;
             };
         };
 
