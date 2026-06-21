@@ -1,0 +1,124 @@
+[h1]v3.8.0[/h1]
+[list]
+[*] Switched surface intersection from FIRE LOD to VIEW LOD in both aic_client and aic_main. View Geometry is correct for visual occlusion; Fire LOD is ballistic penetration geometry and produced wrong results for many objects
+[*] Fixed terrain-baked objects (trees, rocks) incorrectly occluding units. [b]lineIntersectsSurfaces[/b] returns a null object for things baked into terrain, null refs are now treated as non-blocking
+[*] Fixed remote-controlled units (Zeus RC) being hidden by aic_client. Any unit currently being remote controlled is always shown regardless of LOS result
+[*] Fixed all units near the player being hidden while remote controlling a unit via Zeus. The client renderer now detects when RC is active and suspends occlusion entirely for that tick
+[*] Fixed remote-controlled units being culled by aic_main. Units with an active remote controller are excluded from the managed pool
+[*] Fixed parachuting and free-falling units being culled by aic_main. Units with a downward velocity are excluded, covering both units inside a parachute and the free-fall window between exiting an aircraft and chute deployment
+[*] Fixed backspace closing Zeus while typing in configuration edit boxes. The Zeus display now consumes the backspace key only when an edit field has keyboard focus
+[*] Fixed "Generic error in expression" in the main loop LOS check
+[*] Added terrain pre-check to aic_main's per-player LOS loop, consistent with aic_client's two-tier approach. Skips the expensive surface check when terrain already blocks the line
+[*] Added color-coded Active count in the Zeus status window. Green below cap, yellow at cap, orange up to 2x cap, flashing red above
+[*] Added [b]Protected from Culler[/b] checkbox to Eden Editor unit attributes under Object: States. No scripting needed
+[*] Fixed conflict with the Hide Zeus module. aic_client was calling hideObject false on any visible unit, overriding the global hide and making the Zeus player visible to others. The renderer now only reveals units it hid itself
+[*] Fixed enemy vehicle crews not triggering combat activation. Units inside vehicles were invisible to the infantry combat scan; a separate vehicle scan now covers armour, aircraft, and boats
+[*] Fixed AI culled before boarding a vehicle staying simulation-disabled while seated. A dedicated pass re-enables any culled unit inside a vehicle on every tick
+[/list]
+
+[h1]v3.7.0[/h1]
+[list]
+[*] Rewrote aic_client with separate singleplayer and dedicated server MP paths. Listen server (host-client) is explicitly unsupported
+[*] Two-tier LOS: terrain check runs first as a cheap early-out, full surface intersection only runs for units within 600m that passed the terrain check
+[*] Added [b]AIC_clientSurfaceRadius[/b] (default 600m), configurable via CBA Addon Options
+[*] Camo nets and sandbag positions no longer occlude units. Class name filter updated to exclude objects with "net", "bag", or "bunker" in their type
+[*] Switched surface intersection to eye-level positions for accurate origin points
+[*] ADS cone reveal: units within ~30° of aim direction are force-revealed while aiming down sights or through an optic
+[*] Safe radius default raised from 75m to 150m
+[*] Zeus camera bypass now uses the curator display check, units are unhidden as the sweep processes them while Zeus is open
+[*] Enable/disable notification popups now off by default, opt-in via Addon Options
+[*] Added [b]AIC_clientCorpseRadius[/b] (default 300m). Dead AI beyond this distance are hidden by distance alone, no LOS check. Set to 0 to always show corpses
+[/list]
+
+[h1]v3.6.0[/h1]
+[list]
+[*] Added public scripting API: [b]AIC_fnc_protect[/b], [b]AIC_fnc_unprotect[/b], [b]AIC_fnc_isCulled[/b], [b]AIC_fnc_getStats[/b]. Mission makers can protect units and query culler state without touching internal variables
+[*] Added [b]AIC_lastStats[/b] HashMap storing tick stats after every pass, readable via AIC_fnc_getStats
+[*] Bidirectional combat detection: when unit A detects enemy B in combat radius, both groups are forced active in the same tick
+[*] Added behaviour check as a supplementary combat signal, units recently in contact stay active even if the enemy briefly moves out of range
+[*] Extracted waypoint monitor into its own registered function
+[*] [b]allUnits[/b] now snapshotted once per tick and reused throughout, eliminating redundant calls
+[*] Added [b]Show Notifications[/b] to CBA Addon Options
+[/list]
+
+[h1]v3.5.0[/h1]
+[list]
+[*] Removed Zeus Client Renderer panel. All client renderer settings are now in CBA Addon Options
+[*] Added [b]Enable Client Renderer[/b] and [b]Safe Radius[/b] to per-player Addon Options
+[*] Added [b]Debug HUD[/b] as a server-enforced setting that activates the overlay on all clients simultaneously
+[*] [b]AIC_clientRadius[/b] now reads from native viewDistance when ACE3 is not loaded, and syncs every 30 seconds
+[*] Fixed CBA saved settings being overwritten on load
+[/list]
+
+[h1]v3.4.0[/h1]
+[list]
+[*] Added CBA Addon Options integration. Server settings appear under Configure > Addon Options > AI Culler and apply at mission start automatically
+[*] Added client renderer Addon Options page per player
+[*] Mod remains fully functional without CBA, falls back to hard-coded defaults
+[*] Added Zeus FPS Graph panel showing server FPS over the last 90 seconds with live average, min, and max
+[/list]
+
+[h1]v3.3.2[/h1]
+[list]
+[*] Fixed AI crew inside vehicles being included in the culling pool. Disabling simulation on a crew member can break the vehicle entirely
+[/list]
+
+[h1]v3.3.1[/h1]
+[list]
+[*] Fixed server FPS never reaching Zeus clients due to a wrong variable type being passed
+[*] Fixed proximity priority for no-LOS AI under the active cap
+[*] Client renderer defaults tuned for 100-200 AI
+[/list]
+
+[h1]v3.3.0[/h1]
+[list]
+[*] LOS check now evaluated against all connected players. A unit is kept active if any player has line of sight, not just the nearest
+[*] CAManBase replaces Man in all unit filters for full coverage of modded infantry
+[*] AIC_zeusProtected variable tag added to prevent conflicts with other mods
+[*] Simulation state is now saved before disabling and restored on re-enable, preserving AI behaviour set by LAMBS and other mods
+[*] Zeus stats sent only to active curator clients instead of all players
+[*] Label updates sent as a single batched remoteExec per tick covering only units whose state changed
+[*] Toggle protection uses smart group logic: protects all selected units if any are unprotected, only unprotects when all are already protected
+[/list]
+
+[h1]v3.2.0[/h1]
+[list]
+[*] Client renderer tick rate is now adaptive, ranging from 0.2s at 45fps to 1.0s at 15fps
+[*] LOS work is spread across multiple ticks in budgeted slices, eliminating single-tick spikes on high AI counts
+[*] AIC_clientRadius auto-detected from ACE view distance and polled every 30 seconds
+[*] Fixed units hidden mid-sweep lingering invisible until the next full sweep
+[*] Fixed disabling the renderer or entering Zeus mid-sweep leaving units permanently invisible
+[/list]
+
+[h1]v3.1.2[/h1]
+[list]
+[*] Classification loop now yields between every 25-unit chunk, eliminating per-tick FPS spikes on the server
+[*] Yield time scales dynamically with AI count and interval
+[/list]
+
+[h1]v3.1.1[/h1]
+[list]
+[*] Added ADS cone override. Units within ~30° of aim direction are force-rendered while aiming
+[*] Added Zeus camera bypass. While Zeus is open, all hidden units are restored and culling suspends
+[*] Fixed ADS detection using invalid inputAction names that always returned 0
+[/list]
+
+[h1]v3.1.0[/h1]
+[list]
+[*] Added aic_client, the client-side LOS model hider. Hides occluded AI infantry via hideObject, reducing client FPS impact from large AI forces
+[*] Trees and bushes excluded from occlusion checks
+[*] Safe radius (default 75m) always renders nearby AI to prevent pop-in
+[*] Added Zeus Client Renderer panel
+[*] Added per-client debug HUD showing live rendered vs hidden counts
+[/list]
+
+[h1]v3.0.0[/h1]
+[list]
+[*] Added Zeus waypoint Override. AI groups activate automatically when Zeus assigns them a move order, clears when all waypoints are completed
+[*] Added AI vs AI combat detection. Units engaging enemies within AIC_combatRadius are always activated regardless of distance or cap
+[*] Added AIC_distBlufor, BLUFOR now has its own cull distance
+[*] Added AIC_minActiveRadius, units within this radius of a player are always active with no LOS check needed
+[*] Added AIC_combatRadius, configurable radius for combat detection
+[*] Expanded Zeus Settings panel to expose all 9 config variables
+[*] Added 3D floating labels above units visible to Zeus showing Protected, Culled, or Override state
+[/list]

@@ -38,12 +38,15 @@ If the database returns no result or truncated info, flag the uncertainty rather
 
 ## Documentation Updates (Required Before Committing)
 
-Before committing any significant code change (new feature, bug fix, behaviour change), update all three of the following. Do this before the commit, not after.
+Before committing any significant code change (new feature, bug fix, behaviour change), update all four of the following. Do this before the commit, not after.
 
 ### 1. `README.md` changelog
 Add an entry under the current version heading (or create a new version heading if one does not exist). Follow the existing format — bullet points, backtick-wrapped command/variable names, concise descriptions of what changed and why.
 
-### 2. `workshop_description.txt`
+### 2. `workshop_changenotes.txt`
+Add a new version heading at the top of the file (e.g. `[h1]v3.9.0[/h1]`) with a `[list]` of bullet points covering what changed. Use Steam BBCode — `[b]`, `[list]`, `[*]`, `[h1]`. Keep wording plain and direct, no em dashes, no AI-sounding language. Do not remove old entries.
+
+### 3. `workshop_description.txt`
 Update any sections affected by the change:
 - If a new feature was added, add it to the `[h1]Features[/h1]` list
 - If `aic_main` or `aic_client` behaviour changed, update the `[h1]The Solution[/h1]` description
@@ -52,7 +55,7 @@ Update any sections affected by the change:
 - No em dashes — use commas instead
 - Keep the tone natural, not AI-sounding
 
-### 3. Version
+### 4. Version
 If changes are significant enough to warrant a version bump, update `versionStr` and `versionAr` in `@ai_culler/addons/aic_main/config.cpp` and `@ai_culler/addons/aic_client/config.cpp`.
 
 **What counts as significant:** anything that changes gameplay behaviour, fixes a visible bug, adds a feature, or changes a public API. Pure refactors or comment changes do not need doc updates.
