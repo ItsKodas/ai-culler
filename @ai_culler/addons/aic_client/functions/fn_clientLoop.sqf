@@ -151,7 +151,7 @@ if (_enable) then {
                 if (AIC_clientCursor >= count AIC_clientQueue) then {
                     private _allUnitsFr = allUnits + allDeadMen + (agents apply {agent _x});
                     AIC_clientQueue = _allUnitsFr select {
-                        !local _x && { _x isKindOf "CAManBase" && { (_x distance player) < AIC_clientRadius } }
+                        !local _x && { _x isKindOf "CAManBase" && { vehicle _x == _x && { (_x distance player) < AIC_clientRadius } } }
                     };
                     AIC_clientCursor = 0;
                 };

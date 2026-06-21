@@ -14,6 +14,8 @@
 [*] Fixed conflict with the Hide Zeus module. aic_client was calling hideObject false on any visible unit, overriding the global hide and making the Zeus player visible to others. The renderer now only reveals units it hid itself
 [*] Fixed enemy vehicle crews not triggering combat activation. Units inside vehicles were invisible to the infantry combat scan; a separate vehicle scan now covers armour, aircraft, and boats
 [*] Fixed AI culled before boarding a vehicle staying simulation-disabled while seated. A dedicated pass re-enables any culled unit inside a vehicle on every tick
+[*] Declared CBA as a hard dependency for both addons. The A3 launcher will now enforce CBA is loaded before the mod runs
+[*] Fixed aic_client MP loop hiding AI seated inside vehicles. The SP loop already excluded vehicle crew but the MP loop was missing the same filter
 [/list]
 
 [h1]v3.7.0[/h1]
