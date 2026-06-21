@@ -10,6 +10,13 @@ while {true} do {
     private _deadCulled = allDeadMen select { _x getVariable ["AIC_disabled", false] };
     if (_deadCulled isNotEqualTo []) then { [_deadCulled, true] call AIC_fnc_setSimulation };
 
+    // Re-enable any AI that are inside a vehicle but still flagged as culled — they are excluded
+    // from _allAI via vehicle _x == _x so never reach the normal re-enable path
+    private _culledInVehicles = _allUnitsRaw select {
+        !isPlayer _x && { vehicle _x != _x } && { _x getVariable ["AIC_disabled", false] }
+    };
+    if (_culledInVehicles isNotEqualTo []) then { [_culledInVehicles, true] call AIC_fnc_setSimulation };
+
     if (!AIC_cullerEnabled) then {
         // Re-enable any units that were disabled before culler was turned off
         private _toEnable = _allUnitsRaw select { _x getVariable ["AIC_disabled", false] };

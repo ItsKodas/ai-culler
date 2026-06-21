@@ -345,6 +345,8 @@ See [docs/API.md](docs/API.md) for full parameter documentation and examples.
 - Added color-coded Active count in the Zeus status window — green when below cap, yellow at exactly cap, orange up to 2× cap, flashing red above 2× cap
 - Added **Protected from Culler** checkbox to Eden Editor unit attributes in the existing **Object: States** category — sets `AIC_zeusProtected` at mission start via the attribute expression, no scripting required
 - Fixed conflict with the Hide Zeus module — `aic_client` was calling `hideObject false` on any visible unit, overriding `hideObjectGlobal` set by other modules and making the Zeus player visible to other players. The renderer now tracks which units it hid itself (`AIC_clientHid`) and only reveals those, leaving externally hidden units untouched
+- Fixed enemy vehicle crews not triggering combat activation — `nearEntities [["CAManBase"], radius]` does not return units seated inside vehicles, so AI inside enemy vehicles were invisible to the combat detection pass. The check now also scans for nearby enemy vehicles via `nearEntities [["LandVehicle", "Air", "Ship"], radius]` and uses `effectiveCommander` to determine side and group
+- Fixed AI units inside vehicles retaining their culled (simulation disabled) state — units excluded from the culling pool via `vehicle _x == _x` were never reaching the re-enable path, so any unit culled before boarding remained disabled indefinitely while seated. A dedicated pass now re-enables any culled unit whose `vehicle` is not itself on every tick
 
 ### v3.7.0
 - Rewrote `aic_client` loop with separate SP and MP paths — singleplayer uses the local AI pool; dedicated server MP filters to remote-only units. Listen server (host-client) is explicitly unsupported and documented
