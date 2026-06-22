@@ -253,13 +253,13 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     [_maxAI, _distB, _distO, _distI, _distC, _interval, _minRad, _combatRad, _debug] remoteExecCall ["AIC_fnc_applySettings", 2];
 }];
 
-// Consume backspace on the Zeus display when an edit field has focus,
-// preventing the default Zeus keybind from closing the UI mid-input.
-// DIK_BACK = 14, CT_EDIT = 2
+// Consume backspace on the Zeus display when any control has focus.
+// Zeus's native text boxes sit inside controls groups (type 15), so checking
+// ctrlType == 2 misses them. Any non-null focusedCtrl means the user is
+// interacting with the UI and backspace should not toggle the Zeus HUD.
+// DIK_BACK = 14
 _display displayAddEventHandler ["KeyDown", {
     params ["_display", "_key"];
     if (_key != 14) exitWith { false };
-    private _focused = focusedCtrl _display;
-    if (isNull _focused) exitWith { false };
-    ctrlType _focused == 2
+    !isNull (focusedCtrl _display)
 }];
