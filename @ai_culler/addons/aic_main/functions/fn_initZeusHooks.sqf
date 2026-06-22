@@ -13,12 +13,12 @@ if (!hasInterface) exitWith {};
         // ctrlShown on a native control (IDC < 9200) and sync our panel to match.
         // 0.2s poll interval — latency is acceptable for a visibility toggle.
         private _allCtrls    = allControls (findDisplay 312);
-        private _nativeCtrls = _allCtrls select { (ctrlIDC _x) < 9200 };
+        private _nativeCtrls = _allCtrls select { (ctrlIDC _x) < 9200 && ctrlShown _x };
         private _refCtrl     = if (_nativeCtrls isNotEqualTo []) then { _nativeCtrls select 0 } else { controlNull };
 
         [_refCtrl] spawn {
             params ["_refCtrl"];
-            private _lastVis = true;
+            private _lastVis = if (!isNull _refCtrl) then { ctrlShown _refCtrl } else { true };
             while { !isNull (findDisplay 312) } do {
                 uiSleep 0.2;
                 private _disp = findDisplay 312;

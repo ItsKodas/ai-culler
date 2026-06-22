@@ -253,13 +253,20 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     [_maxAI, _distB, _distO, _distI, _distC, _interval, _minRad, _combatRad, _debug] remoteExecCall ["AIC_fnc_applySettings", 2];
 }];
 
-// Consume backspace on the Zeus display when any control has focus.
-// Zeus's native text boxes sit inside controls groups (type 15), so checking
-// ctrlType == 2 misses them. Any non-null focusedCtrl means the user is
-// interacting with the UI and backspace should not toggle the Zeus HUD.
-// DIK_BACK = 14
+// Consume backspace when a text-input control has focus, preventing Zeus's
+// HUD toggle from firing mid-input. DIK_BACK = 14, CT_EDIT = 2,
+// CT_XLISTBOX = 8, CT_LISTNBOX = 96, CT_CONTROLS_GROUP = 15.
+// Zeus's native text boxes sit inside controls groups (type 15), so we
+// check one level of children when the focused control is a group.
 _display displayAddEventHandler ["KeyDown", {
     params ["_display", "_key"];
     if (_key != 14) exitWith { false };
-    !isNull (focusedCtrl _display)
+    private _focused = focusedCtrl _display;
+    if (isNull _focused) exitWith { false };
+    private _type = ctrlType _focused;
+    if (_type in [2, 8, 96]) exitWith { true };
+    if (_type == 15) exitWith {
+        (allControls _focused) findIf { (ctrlType _x) in [2, 8, 96] } != -1
+    };
+    false
 }];
