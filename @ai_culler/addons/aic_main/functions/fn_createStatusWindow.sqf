@@ -270,12 +270,13 @@ _display displayAddEventHandler ["KeyDown", {
     if (_type == 15) exitWith {
         (allControls _focused) findIf { (ctrlType _x) in [2, 8, 96] } != -1
     };
-    // Backspace reaches Zeus and toggles the HUD — sync our panel after a
-    // brief delay to let Zeus finish processing first.
-    [_display, ctrlShown (_display displayCtrl 9200)] spawn {
-        params ["_disp", "_wasVisible"];
-        uiSleep 0.05;
-        if (_wasVisible) then {
+    // Backspace reaches Zeus and toggles the HUD. Wait 0.1s for Arma to set
+    // RscDisplayCurator_screenshotMode (same technique used by other Zeus mods),
+    // then read it directly rather than guessing from our own panel state.
+    [_display] spawn {
+        params ["_disp"];
+        uiSleep 0.1;
+        if (uiNamespace getVariable ["RscDisplayCurator_screenshotMode", false]) then {
             { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow false; _c ctrlCommit 0; }; }
                 forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220,9251,9252,9253,9254];
         } else {
