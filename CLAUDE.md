@@ -2,7 +2,7 @@
 
 ## SQF Database Research (Required)
 
-Before writing or modifying any SQF code, always search the Arma 3 documentation database to verify commands, syntax, return types, and version availability.
+Before writing or modifying any SQF code — no matter how small the change — always search the Arma 3 documentation database to verify every command used, its syntax, return types, and version availability. This applies to all edits, including single-line fixes and refactors.
 
 The database is at `docs/arma3.db`. Use the search script:
 
