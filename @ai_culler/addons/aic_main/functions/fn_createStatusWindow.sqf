@@ -283,9 +283,10 @@ _display displayAddEventHandler ["KeyDown", {
         };
         true
     };
-    if (_type == 15) exitWith {
-        (allControls _focused) findIf { (ctrlType _x) in [2, 8, 96] } != -1
-    };
+    // CT_CONTROLS_GROUP — vanilla Zeus text boxes always sit inside a controls
+    // group. The group handles character deletion internally so we can safely
+    // return true to block Zeus's HUD toggle at the display level.
+    if (_type == 15) exitWith { true };
     // Backspace reaches Zeus and toggles the HUD. Wait 0.1s for Arma to set
     // RscDisplayCurator_screenshotMode (same technique used by other Zeus mods),
     // then read it directly rather than guessing from our own panel state.
