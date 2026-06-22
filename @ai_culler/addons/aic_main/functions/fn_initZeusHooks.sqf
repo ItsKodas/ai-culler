@@ -8,50 +8,6 @@ if (!hasInterface) exitWith {};
         [findDisplay 312] call AIC_fnc_createStatusWindow;
         [findDisplay 312] call AIC_fnc_createFpsGraphPanel;
 
-        // Mirror Zeus HUD visibility by polling a native Zeus control.
-        // displayAddEventHandler "Hide"/"Show" are not valid for displays, so we watch
-        // ctrlShown on a native control (IDC < 9200) and sync our panel to match.
-        // 0.2s poll interval — latency is acceptable for a visibility toggle.
-        private _allCtrls    = allControls (findDisplay 312);
-        private _nativeCtrls = _allCtrls select { (ctrlIDC _x) < 9200 && ctrlShown _x };
-        private _refCtrl     = if (_nativeCtrls isNotEqualTo []) then { _nativeCtrls select 0 } else { controlNull };
-
-        [_refCtrl] spawn {
-            params ["_refCtrl"];
-            private _lastVis = if (!isNull _refCtrl) then { ctrlShown _refCtrl } else { true };
-            while { !isNull (findDisplay 312) } do {
-                uiSleep 0.2;
-                private _disp = findDisplay 312;
-                if (isNull _disp || isNull _refCtrl) exitWith {};
-                private _nowVis = ctrlShown _refCtrl;
-                if (_nowVis != _lastVis) then {
-                    _lastVis = _nowVis;
-                    if (_nowVis) then {
-                        private _collapsed    = (_disp displayCtrl 9202) getVariable ["AIC_collapsed", false];
-                        private _settingsOpen = (_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false];
-                        private _graphOpen    = (_disp displayCtrl 9250) getVariable ["AIC_graphOpen", false];
-                        { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
-                            forEach [9200,9201,9202];
-                        if (!_collapsed) then {
-                            { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
-                                forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250];
-                            if (_graphOpen) then {
-                                { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
-                                    forEach [9251,9252,9253,9254];
-                            };
-                            if (_settingsOpen) then {
-                                { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
-                                    forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
-                            };
-                        };
-                    } else {
-                        { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow false; _c ctrlCommit 0; }; }
-                            forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220,9251,9252,9253,9254];
-                    };
-                };
-            };
-        };
-
         // 1-second FPS refresh - updates Srv/Clt FPS rows and feeds the FPS graph.
         // History array length == graph column count; oldest entry is dropped from
         // the front each tick once full, so the array IS the display data directly.

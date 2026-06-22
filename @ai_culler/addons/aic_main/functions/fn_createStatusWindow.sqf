@@ -253,11 +253,13 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
     [_maxAI, _distB, _distO, _distI, _distC, _interval, _minRad, _combatRad, _debug] remoteExecCall ["AIC_fnc_applySettings", 2];
 }];
 
-// Consume backspace when a text-input control has focus, preventing Zeus's
-// HUD toggle from firing mid-input. DIK_BACK = 14, CT_EDIT = 2,
-// CT_XLISTBOX = 8, CT_LISTNBOX = 96, CT_CONTROLS_GROUP = 15.
-// Zeus's native text boxes sit inside controls groups (type 15), so we
-// check one level of children when the focused control is a group.
+// DIK_BACK = 14, CT_EDIT = 2, CT_XLISTBOX = 8, CT_LISTNBOX = 96,
+// CT_CONTROLS_GROUP = 15.
+// When backspace is pressed with a text-input control focused, consume
+// the key so Zeus's HUD toggle does not fire. Zeus's native text boxes
+// sit inside controls groups (type 15), so check one level of children.
+// When backspace falls through (no text input active), Zeus will toggle
+// its HUD — spawn a brief delayed update to mirror that in our panel.
 _display displayAddEventHandler ["KeyDown", {
     params ["_display", "_key"];
     if (_key != 14) exitWith { false };
@@ -267,6 +269,34 @@ _display displayAddEventHandler ["KeyDown", {
     if (_type in [2, 8, 96]) exitWith { true };
     if (_type == 15) exitWith {
         (allControls _focused) findIf { (ctrlType _x) in [2, 8, 96] } != -1
+    };
+    // Backspace reaches Zeus and toggles the HUD — sync our panel after a
+    // brief delay to let Zeus finish processing first.
+    [_display, ctrlShown (_display displayCtrl 9200)] spawn {
+        params ["_disp", "_wasVisible"];
+        uiSleep 0.05;
+        if (_wasVisible) then {
+            { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow false; _c ctrlCommit 0; }; }
+                forEach [9200,9201,9202,9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250,9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220,9251,9252,9253,9254];
+        } else {
+            private _collapsed    = (_disp displayCtrl 9202) getVariable ["AIC_collapsed", false];
+            private _settingsOpen = (_disp displayCtrl 9209) getVariable ["AIC_settingsOpen", false];
+            private _graphOpen    = (_disp displayCtrl 9250) getVariable ["AIC_graphOpen", false];
+            { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                forEach [9200,9201,9202];
+            if (!_collapsed) then {
+                { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                    forEach [9203,9204,9205,9206,9207,9221,9229,9230,9231,9208,9209,9250];
+                if (_graphOpen) then {
+                    { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                        forEach [9251,9252,9253,9254];
+                };
+                if (_settingsOpen) then {
+                    { private _c = _disp displayCtrl _x; if (!isNull _c) then { _c ctrlShow true; _c ctrlCommit 0; }; }
+                        forEach [9210,9211,9212,9213,9214,9215,9216,9217,9218,9219,9222,9223,9224,9225,9227,9228,9226,9220];
+                };
+            };
+        };
     };
     false
 }];
