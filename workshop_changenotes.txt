@@ -7,6 +7,7 @@
 [*] Fixed remote-controlled units being culled by aic_main. Units with an active remote controller are excluded from the managed pool
 [*] Fixed parachuting and free-falling units being culled by aic_main. Units with a downward velocity are excluded, covering both units inside a parachute and the free-fall window between exiting an aircraft and chute deployment
 [*] Fixed backspace closing Zeus while typing in configuration edit boxes. The Zeus display now consumes the backspace key only when an edit field has keyboard focus
+[*] Fixed AIC status panel hide/show being unreliable on backspace. The panel now follows Zeus's own display Hide/Show events instead of trying to track the key independently
 [*] Fixed "Generic error in expression" in the main loop LOS check
 [*] Added terrain pre-check to aic_main's per-player LOS loop, consistent with aic_client's two-tier approach. Skips the expensive surface check when terrain already blocks the line
 [*] Added color-coded Active count in the Zeus status window. Green below cap, yellow at cap, orange up to 2x cap, flashing red above
