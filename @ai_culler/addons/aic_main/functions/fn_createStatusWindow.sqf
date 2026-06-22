@@ -211,13 +211,10 @@ private _eW = _w - 0.007 - _lW - 0.004 - 0.007;
     _edtCtrl ctrlCommit 0;
     _edtCtrl ctrlShow false;
     _edtCtrl ctrlCommit 0;
-    _edtCtrl ctrlAddEventHandler ["FocusGained", {
-        params ["_ctrl"];
-        (ctrlParent _ctrl) setVariable ["AIC_editFocused", true];
-    }];
-    _edtCtrl ctrlAddEventHandler ["FocusLost", {
-        params ["_ctrl"];
-        (ctrlParent _ctrl) setVariable ["AIC_editFocused", false];
+    _edtCtrl ctrlAddEventHandler ["KeyDown", {
+        params ["_ctrl", "_key"];
+        if (_key == 14) exitWith { true };
+        false
     }];
 } forEach _settingsDefs;
 
@@ -271,10 +268,8 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
 _display displayAddEventHandler ["KeyDown", {
     params ["_display", "_key"];
     if (_key != 14) exitWith { false };
-    // AIC edit controls track their own focus via FocusGained/FocusLost handlers
-    // because focusedCtrl is unreliable for runtime-created controls.
-    if (_display getVariable ["AIC_editFocused", false]) exitWith { true };
-    // For vanilla Zeus text boxes (inside controls groups, type 15)
+    // AIC edit controls handle backspace via their own KeyDown EH. This path
+    // covers vanilla Zeus text boxes (direct CT_EDIT or inside a CT_CONTROLS_GROUP).
     private _focused = focusedCtrl _display;
     if (isNull _focused) exitWith { false };
     private _type = ctrlType _focused;
