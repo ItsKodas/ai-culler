@@ -211,11 +211,11 @@ private _eW = _w - 0.007 - _lW - 0.004 - 0.007;
     _edtCtrl ctrlCommit 0;
     _edtCtrl ctrlShow false;
     _edtCtrl ctrlCommit 0;
-    _edtCtrl ctrlAddEventHandler ["GainFocus", {
+    _edtCtrl ctrlAddEventHandler ["FocusGained", {
         params ["_ctrl"];
         (ctrlParent _ctrl) setVariable ["AIC_editFocused", true];
     }];
-    _edtCtrl ctrlAddEventHandler ["LoseFocus", {
+    _edtCtrl ctrlAddEventHandler ["FocusLost", {
         params ["_ctrl"];
         (ctrlParent _ctrl) setVariable ["AIC_editFocused", false];
     }];
@@ -271,7 +271,7 @@ _applyBtn ctrlAddEventHandler ["ButtonClick", {
 _display displayAddEventHandler ["KeyDown", {
     params ["_display", "_key"];
     if (_key != 14) exitWith { false };
-    // AIC edit controls track their own focus via GainFocus/LoseFocus handlers
+    // AIC edit controls track their own focus via FocusGained/FocusLost handlers
     // because focusedCtrl is unreliable for runtime-created controls.
     if (_display getVariable ["AIC_editFocused", false]) exitWith { true };
     // For vanilla Zeus text boxes (inside controls groups, type 15)
