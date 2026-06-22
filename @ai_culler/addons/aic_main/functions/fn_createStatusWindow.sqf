@@ -211,11 +211,6 @@ private _eW = _w - 0.007 - _lW - 0.004 - 0.007;
     _edtCtrl ctrlCommit 0;
     _edtCtrl ctrlShow false;
     _edtCtrl ctrlCommit 0;
-    _edtCtrl ctrlAddEventHandler ["KeyDown", {
-        params ["_ctrl", "_key"];
-        if (_key == 14) exitWith { true };
-        false
-    }];
 } forEach _settingsDefs;
 
 // Debug toggle button (row 16, initially hidden)
@@ -273,7 +268,18 @@ _display displayAddEventHandler ["KeyDown", {
     private _focused = focusedCtrl _display;
     if (isNull _focused) exitWith { false };
     private _type = ctrlType _focused;
-    if (_type in [2, 8, 96]) exitWith { true };
+    if (_type in [2, 8, 96]) exitWith {
+        // Direct CT_EDIT on this display means one of our AIC settings boxes.
+        // Returning true blocks Zeus's HUD toggle but also blocks the engine's
+        // native character-delete, so we do it manually.
+        if (_type == 2) then {
+            private _text = ctrlText _focused;
+            if (count _text > 0) then {
+                _focused ctrlSetText (_text select [0, (count _text) - 1]);
+            };
+        };
+        true
+    };
     if (_type == 15) exitWith {
         (allControls _focused) findIf { (ctrlType _x) in [2, 8, 96] } != -1
     };
