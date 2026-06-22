@@ -269,12 +269,12 @@ _display displayAddEventHandler ["KeyDown", {
     if (isNull _focused) exitWith { false };
     private _type = ctrlType _focused;
     if (_type in [2, 8, 96]) exitWith {
-        // Direct CT_EDIT on this display means one of our AIC settings boxes.
-        // Returning true blocks Zeus's HUD toggle but also blocks the engine's
-        // native character-delete, so we do it manually.
-        // Arma may cycle focus after we return true, so we re-set it after
-        // a zero-sleep to let the engine finish its own processing first.
-        if (_type == 2) then {
+        // For our own AIC edit boxes, returning true blocks the engine's native
+        // character-delete so we do it manually and restore focus.
+        // For vanilla Zeus edit controls (type 2 but not our IDC), the controls
+        // group handles deletion natively — don't delete a second time.
+        private _aicEditIDCs = [9211, 9213, 9215, 9217, 9219, 9223, 9225, 9228];
+        if (_type == 2 && { (ctrlIDC _focused) in _aicEditIDCs }) then {
             private _text = ctrlText _focused;
             if (count _text > 0) then {
                 _focused ctrlSetText (_text select [0, (count _text) - 1]);
